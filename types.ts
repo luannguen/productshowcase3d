@@ -11,6 +11,16 @@ export interface Product {
   };
 }
 
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface ToastMessage {
+  id: number;
+  message: string;
+}
+
 export enum ViewMode {
   Grid = 'Grid',
   List = 'List',

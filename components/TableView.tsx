@@ -4,9 +4,10 @@ import { Product } from '../types';
 
 interface TableViewProps {
   products: Product[];
+  onProductClick: (product: Product) => void;
 }
 
-const TableView: React.FC<TableViewProps> = ({ products }) => {
+const TableView: React.FC<TableViewProps> = ({ products, onProductClick }) => {
   return (
     <div className="bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-lg overflow-x-auto">
       <table className="w-full text-sm text-left text-[var(--text-secondary)]">
@@ -20,7 +21,11 @@ const TableView: React.FC<TableViewProps> = ({ products }) => {
         </thead>
         <tbody>
           {products.map((product) => (
-            <tr key={product.id} className="bg-[var(--background-secondary)] border-b border-[var(--border-color)] hover:bg-[var(--background-tertiary)]/50">
+            <tr 
+              key={product.id} 
+              className="bg-[var(--background-secondary)] border-b border-[var(--border-color)] hover:bg-[var(--background-tertiary)]/50 cursor-pointer"
+              onClick={() => onProductClick(product)}
+            >
               <td className="p-4">
                 <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded-md" />
               </td>
