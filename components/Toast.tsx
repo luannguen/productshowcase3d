@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToastMessage } from '../types';
-import { CartIcon } from './icons';
+import { CheckIcon } from './icons';
 
 interface ToastProps {
   message: string;
+  onRemove: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ message }) => {
+const Toast: React.FC<ToastProps> = ({ message, onRemove }) => {
+  useEffect(() => {
+    const timer = setTimeout(onRemove, 3000);
+    return () => clearTimeout(timer);
+  }, [onRemove]);
+
   return (
     <motion.div
       layout
@@ -17,8 +23,8 @@ const Toast: React.FC<ToastProps> = ({ message }) => {
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)] bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-2xl border border-[var(--border-color)]"
     >
-      <div className="text-[var(--primary-accent)]">
-        <CartIcon className="w-5 h-5" />
+      <div className="text-green-400">
+        <CheckIcon className="w-5 h-5" />
       </div>
       <span>{message}</span>
     </motion.div>
@@ -27,14 +33,15 @@ const Toast: React.FC<ToastProps> = ({ message }) => {
 
 interface ToastContainerProps {
   toasts: ToastMessage[];
+  removeToast: (id: number) => void;
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts }) => {
+const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, removeToast }) => {
   return (
     <div className="fixed bottom-4 right-4 z-[100] space-y-2">
       <AnimatePresence>
         {toasts.map(toast => (
-          <Toast key={toast.id} message={toast.message} />
+          <Toast key={toast.id} message={toast.message} onRemove={() => removeToast(toast.id)} />
         ))}
       </AnimatePresence>
     </div>

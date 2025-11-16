@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '../types';
@@ -10,27 +9,35 @@ interface ListViewProps {
   onAddToCart: (product: Product) => void;
 }
 
-const ListView: React.FC<ListViewProps> = ({ products, onProductClick, onAddToCart }) => {
-  return (
-    <div className="space-y-4">
-      {products.map((product) => (
+const ListItem: React.FC<{ product: Product, onProductClick: (product: Product) => void, onAddToCart: (product: Product) => void }> = ({ product, onProductClick, onAddToCart }) => {
+    
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const { currentTarget: target } = e;
+        const rect = target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        target.style.setProperty("--x", `${x}px`);
+        target.style.setProperty("--y", `${y}px`);
+    };
+
+    return (
         <div 
-          key={product.id} 
-          className="flex flex-col sm:flex-row items-center bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-md overflow-hidden p-4 hover:bg-[var(--background-tertiary)]/50 transition-colors duration-300 cursor-pointer"
+          className="flex flex-col sm:flex-row items-center rounded-[var(--border-radius)] shadow-md overflow-hidden p-4 transition-colors duration-300 cursor-pointer aurora-item"
+          onMouseMove={handleMouseMove}
           onClick={() => onProductClick(product)}
         >
           <motion.img 
             src={product.imageUrl} 
             alt={product.name} 
-            className="w-full sm:w-48 h-48 sm:h-32 object-cover rounded-md"
+            className="w-full sm:w-48 h-48 sm:h-32 object-cover rounded-md flex-shrink-0"
             layoutId={`product-image-${product.id}`}
           />
-          <div className="sm:ml-6 mt-4 sm:mt-0 flex-1">
+          <div className="sm:ml-6 mt-4 sm:mt-0 flex-1 z-10">
             <h3 className="text-2xl font-bold text-[var(--text-primary)]">{product.name}</h3>
             <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">{product.description}</p>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-right flex-shrink-0">
-            <p className="text-3xl font-bold text-[var(--primary-accent)]">${product.price.toFixed(2)}</p>
+          <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-right flex-shrink-0 z-10">
+            <p className="text-3xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -44,6 +51,19 @@ const ListView: React.FC<ListViewProps> = ({ products, onProductClick, onAddToCa
             </button>
           </div>
         </div>
+    );
+};
+
+const ListView: React.FC<ListViewProps> = ({ products, onProductClick, onAddToCart }) => {
+  return (
+    <div className="space-y-4">
+      {products.map((product) => (
+        <ListItem 
+          key={product.id} 
+          product={product}
+          onProductClick={onProductClick}
+          onAddToCart={onAddToCart}
+        />
       ))}
     </div>
   );

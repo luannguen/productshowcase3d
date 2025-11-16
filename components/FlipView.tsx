@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '../types';
@@ -24,7 +23,7 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
                 />
                 <div className="p-4 flex flex-col flex-grow justify-between">
                     <h3 className="text-xl font-bold text-[var(--text-primary)]">{product.name}</h3>
-                    <p className="text-2xl font-bold text-[var(--primary-accent)] self-end">${product.price.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-[var(--primary-accent)] self-end tabular-nums">${product.price.toFixed(2)}</p>
                 </div>
             </div>
             {/* Back of card */}
@@ -32,7 +31,7 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
                  <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">{product.name}</h3>
                 <p className="text-[var(--text-secondary)] flex-grow">{product.description}</p>
                  <div className="mt-4 flex justify-between items-center w-full">
-                    <p className="text-2xl font-bold text-[var(--primary-accent)]">${product.price.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
                     <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -70,7 +69,8 @@ const FlipView: React.FC<FlipViewProps> = ({ products, onProductClick, onAddToCa
     >
       {products.map((product) => (
         <BaseCard key={product.id} onClick={() => onProductClick(product)}>
-          <div className="group" onMouseEnter={e => e.currentTarget.classList.add('hover')} onMouseLeave={e => e.currentTarget.classList.remove('hover')}>
+           {/* The 'group' div triggers the flip effect on hover via CSS in index.html */}
+          <div className="group">
             <FlipCard product={product} onAddToCart={onAddToCart} />
           </div>
         </BaseCard>

@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ViewMode } from '../types';
 import { GridIcon, ListIcon, TableIcon, FlipIcon, CarouselIcon, ThreeDIcon, StoryIcon } from './icons';
+import Tooltip from './Tooltip';
 
 interface ViewSwitcherProps {
   currentView: ViewMode;
@@ -21,19 +23,31 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView, setView }) => 
   return (
     <div className="flex items-center bg-[var(--background-tertiary)] rounded-[var(--border-radius)] p-1 space-x-1">
       {viewOptions.map(({ mode, Icon }) => (
-        <button
-          key={mode}
-          onClick={() => setView(mode)}
-          className={`flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-tertiary)] focus:ring-[var(--primary-accent)] ${
-            currentView === mode
-              ? 'bg-[var(--primary-accent)] text-white shadow-md'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]'
-          }`}
-          aria-label={`Switch to ${mode} view`}
-        >
-          <Icon className="w-5 h-5 mr-2" />
-          <span className="hidden sm:inline">{mode}</span>
-        </button>
+        <Tooltip key={mode} text={`Switch to ${mode} View`}>
+          <motion.button
+            onClick={() => setView(mode)}
+            className={`relative flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-tertiary)] focus:ring-[var(--primary-accent)] ${
+              currentView === mode
+                ? 'text-white'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            aria-label={`Switch to ${mode} view`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {currentView === mode && (
+              <motion.div
+                layoutId="view-switcher-active-pill"
+                className="absolute inset-0 bg-[var(--primary-accent)] rounded-[var(--border-radius)] shadow-md z-0"
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              />
+            )}
+            <div className="relative z-10 flex items-center">
+                <Icon className="w-5 h-5 mr-2" />
+                <span className="hidden sm:inline">{mode}</span>
+            </div>
+          </motion.button>
+        </Tooltip>
       ))}
     </div>
   );

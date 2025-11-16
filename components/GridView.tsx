@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '../types';
@@ -22,7 +21,7 @@ const ProductCardContent: React.FC<{ product: Product, onAddToCart: (product: Pr
     <div className="p-4 flex flex-col flex-grow">
       <h3 className="text-lg font-semibold text-[var(--text-primary)] flex-grow">{product.name}</h3>
       <div className="mt-4 flex justify-between items-center">
-        <p className="text-2xl font-bold text-[var(--primary-accent)]">${product.price.toFixed(2)}</p>
+        <p className="text-2xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
         <button 
           onClick={(e) => {
             e.stopPropagation();

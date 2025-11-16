@@ -1,11 +1,50 @@
-
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Product } from '../types';
 
 interface TableViewProps {
   products: Product[];
   onProductClick: (product: Product) => void;
 }
+
+const TableRow: React.FC<{ product: Product, onProductClick: (product: Product) => void }> = ({ product, onProductClick }) => {
+    
+    const handleMouseMove = (e: React.MouseEvent<HTMLTableRowElement>) => {
+        const { currentTarget: target } = e;
+        const rect = target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        target.style.setProperty("--x", `${x}px`);
+        target.style.setProperty("--y", `${y}px`);
+    };
+
+    return (
+        <tr 
+          className="border-b border-[var(--border-color)] cursor-pointer aurora-item"
+          onMouseMove={handleMouseMove}
+          onClick={() => onProductClick(product)}
+        >
+          <td className="p-4 z-10">
+            <motion.img 
+              src={product.imageUrl} 
+              alt={product.name} 
+              className="w-16 h-16 object-cover rounded-md" 
+              layoutId={`product-image-${product.id}`}
+            />
+          </td>
+          <td className="px-6 py-4 font-medium text-[var(--text-primary)] whitespace-nowrap z-10">
+            {product.name}
+          </td>
+          <td className="px-6 py-4 max-w-sm z-10">
+            {product.description}
+          </td>
+          <td className="px-6 py-4 text-right font-semibold text-[var(--primary-accent)] tabular-nums z-10">
+            ${product.price.toFixed(2)}
+          </td>
+        </tr>
+    );
+};
+
 
 const TableView: React.FC<TableViewProps> = ({ products, onProductClick }) => {
   return (
@@ -21,24 +60,7 @@ const TableView: React.FC<TableViewProps> = ({ products, onProductClick }) => {
         </thead>
         <tbody>
           {products.map((product) => (
-            <tr 
-              key={product.id} 
-              className="bg-[var(--background-secondary)] border-b border-[var(--border-color)] hover:bg-[var(--background-tertiary)]/50 cursor-pointer"
-              onClick={() => onProductClick(product)}
-            >
-              <td className="p-4">
-                <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded-md" />
-              </td>
-              <td className="px-6 py-4 font-medium text-[var(--text-primary)] whitespace-nowrap">
-                {product.name}
-              </td>
-              <td className="px-6 py-4 max-w-sm">
-                {product.description}
-              </td>
-              <td className="px-6 py-4 text-right font-semibold text-[var(--primary-accent)]">
-                ${product.price.toFixed(2)}
-              </td>
-            </tr>
+            <TableRow key={product.id} product={product} onProductClick={onProductClick} />
           ))}
         </tbody>
       </table>

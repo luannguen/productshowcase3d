@@ -1,5 +1,6 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+// FIX: Import AnimatePresence, useMotionValue, and animate. Remove useAnimation.
+import { motion, AnimatePresence, PanInfo, useMotionValue, animate } from 'framer-motion';
 import { Product } from '../types';
 import { CartIcon } from './icons';
 
@@ -8,61 +9,77 @@ interface StoryViewProps {
   onAddToCart: (product: Product) => void;
 }
 
+const STORY_DURATION = 8000; // 8 seconds per story
+
 const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
+    // FIX: Replace useAnimation with useMotionValue and a ref for animation controls.
     const [activeIndex, setActiveIndex] = useState(0);
-    const [imageLoaded, setImageLoaded] = useState<Record<number, boolean>>({});
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const storyRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const width = useMotionValue("0%");
+    const animationRef = useRef<any>(null);
+    const timerRef = useRef<number | null>(null);
+    const isPaused = useRef(false);
+    
+    const goToStory = useCallback((index: number) => {
+        if (index < 0 || index >= products.length) return;
+        setActiveIndex(index);
+        width.set("0%");
+        if (animationRef.current) {
+            animationRef.current.stop();
+        }
+        animationRef.current = animate(width, "100%", { duration: STORY_DURATION / 1000, ease: "linear" });
+    }, [products.length, width]);
 
     useEffect(() => {
-        storyRefs.current = storyRefs.current.slice(0, products.length);
-        // Preload adjacent images
-        if (products.length > 0) {
-            const preloadNext = (activeIndex + 1) % products.length;
-            const preloadPrev = (activeIndex - 1 + products.length) % products.length;
-            [products[activeIndex], products[preloadNext], products[preloadPrev]].forEach(p => {
-                if (p && p.story) {
-                    new Image().src = p.imageUrl;
-                    new Image().src = p.story.imageUrl;
-                }
-            });
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (!isPaused.current) {
+            timerRef.current = window.setTimeout(() => {
+                goToStory((activeIndex + 1) % products.length);
+            }, STORY_DURATION);
         }
-    }, [products, activeIndex]);
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [activeIndex, products.length, goToStory]);
 
-    const handleScroll = () => {
-        if (!scrollContainerRef.current) return;
-        const { scrollLeft, clientWidth } = scrollContainerRef.current;
-        const index = Math.round(scrollLeft / clientWidth);
-        if (index !== activeIndex) {
-            setActiveIndex(index);
+    useEffect(() => {
+        goToStory(0);
+        return () => {
+            if (animationRef.current) {
+                animationRef.current.stop();
+            }
+        };
+    }, [goToStory]);
+    
+    const handlePointerDown = () => {
+        isPaused.current = true;
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (animationRef.current) {
+            animationRef.current.stop();
         }
     };
-    
-    useEffect(() => {
-        const currentImage = products[activeIndex]?.imageUrl;
-        if (currentImage && !imageLoaded[activeIndex]) {
-            const img = new Image();
-            img.src = currentImage;
-            img.onload = () => {
-                setImageLoaded(prev => ({ ...prev, [activeIndex]: true }));
-            };
-        } else if (!currentImage) {
-            // No image, so content can show immediately
-            setImageLoaded(prev => ({ ...prev, [activeIndex]: true }));
+
+    const handlePointerUp = () => {
+        isPaused.current = false;
+        // FIX: Use width motion value's get() method to calculate remaining duration.
+        const currentWidthPercent = parseFloat(width.get().replace('%', ''));
+        const remainingDuration = (1 - (currentWidthPercent / 100)) * STORY_DURATION;
+
+        if (animationRef.current) {
+            animationRef.current.stop();
         }
-    }, [activeIndex, products, imageLoaded]);
+        animationRef.current = animate(width, "100%", { duration: remainingDuration / 1000, ease: "linear" });
+        
+        timerRef.current = window.setTimeout(() => {
+            goToStory((activeIndex + 1) % products.length);
+        }, remainingDuration);
+    };
 
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        container?.addEventListener('scroll', handleScroll, { passive: true });
-        return () => container?.removeEventListener('scroll', handleScroll);
-    }, [activeIndex]);
-
-    const scrollToStory = (index: number) => {
-        storyRefs.current[index]?.scrollIntoView({
-            behavior: 'smooth',
-            inline: 'start',
-        });
+    const handleDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        if (info.offset.x > 50) {
+            goToStory(activeIndex - 1);
+        } else if (info.offset.x < -50) {
+            goToStory(activeIndex + 1);
+        }
     };
 
     if (products.length === 0) {
@@ -74,82 +91,84 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
         );
     }
     
+    const activeProduct = products[activeIndex];
+
     return (
         <div className="h-[calc(100vh-200px)] w-full relative flex flex-col items-center justify-center bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-2xl overflow-hidden">
-            <div ref={scrollContainerRef} className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
-                {products.map((product, index) => (
-                    <div
-                        key={product.id}
-                        ref={el => { storyRefs.current[index] = el; }}
-                        className="w-full h-full flex-shrink-0 snap-start flex items-center justify-center p-8 relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 z-0">
-                             <img src={product.story?.imageUrl} alt={`${product.name} story background`} className={`w-full h-full object-cover transition-opacity duration-500 ${Math.abs(activeIndex - index) <= 1 ? 'opacity-100' : 'opacity-0'} ${activeIndex === index ? 'animate-kenburns' : ''}`} />
-                            <div className="absolute inset-0 bg-gradient-to-r from-[var(--background-secondary)] via-[var(--background-secondary)]/70 to-transparent"></div>
-                        </div>
-
-                        <div className={`relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-center gap-8 transition-opacity duration-700 ${activeIndex === index ? 'opacity-100' : 'opacity-0'}`}>
-                           {activeIndex === index && (
-                            <>
-                                <div className="w-full md:w-1/2 flex items-center justify-center">
-                                    <img src={product.imageUrl} alt={product.name} className={`max-h-[60vh] w-auto object-contain rounded-lg drop-shadow-2xl transition-opacity duration-700 ${imageLoaded[index] ? 'opacity-100' : 'opacity-0'}`} style={{ animation: `slideInUp 0.8s 0.2s ease-out forwards`, opacity: 0 }} />
-                                </div>
-                                <div className="w-full md:w-1/2 text-center md:text-left">
-                                   {imageLoaded[index] && (
-                                     <>
-                                        <div style={{ animation: `slideInUp 0.8s 0.4s ease-out forwards`, opacity: 0 }}>
-                                            <h2 className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)]" style={{ fontFamily: 'var(--font-family)' }}>
-                                                {product.story?.title}
-                                            </h2>
-                                            <h3 className="text-2xl lg:text-3xl mt-1 font-semibold text-[var(--text-primary)]">{product.name}</h3>
-                                        </div>
-                                        <p className="mt-4 text-lg text-[var(--text-secondary)] max-w-prose mx-auto md:mx-0" style={{ animation: `slideInUp 0.8s 0.6s ease-out forwards`, opacity: 0 }}>
-                                            {product.story?.narrative}
-                                        </p>
-                                        <div className="mt-6 flex items-center justify-center md:justify-start gap-6" style={{ animation: `fadeIn 0.8s 0.8s ease-out forwards`, opacity: 0 }}>
-                                            <p className="text-4xl font-extrabold text-[var(--primary-accent)]">
-                                                ${product.price.toFixed(2)}
-                                            </p>
-                                            <button 
-                                                onClick={() => onAddToCart(product)}
-                                                className="px-6 py-3 bg-[var(--primary-accent)] text-white font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors duration-200 flex items-center gap-2 text-lg shadow-lg add-to-cart-animation"
-                                                aria-label={`Add ${product.name} to cart`}
-                                            >
-                                                <CartIcon className="w-6 h-6" />
-                                                Add to Cart
-                                            </button>
-                                        </div>
-                                     </>
-                                   )}
-                                </div>
-                            </>
-                           )}
-                        </div>
+            {/* Progress Bars */}
+            <div className="absolute top-4 left-4 right-4 z-20 flex gap-2">
+                {products.map((_, index) => (
+                    <div key={index} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
+                        {index < activeIndex && <div className="h-full w-full bg-[var(--primary-accent)]" />}
+                        {/* FIX: Use the motion value in the style prop to drive the animation. */}
+                        {index === activeIndex && <motion.div className="h-full bg-[var(--primary-accent)]" style={{ width }} />}
                     </div>
                 ))}
             </div>
 
-            {activeIndex > 0 && (
-                <button onClick={() => scrollToStory(activeIndex - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--background-tertiary)]/50 backdrop-blur-sm rounded-full p-3 text-[var(--text-primary)] hover:bg-[var(--primary-accent)] transition-all duration-300">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-            )}
-            {activeIndex < products.length - 1 && (
-                <button onClick={() => scrollToStory(activeIndex + 1)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--background-tertiary)]/50 backdrop-blur-sm rounded-full p-3 text-[var(--text-primary)] hover:bg-[var(--primary-accent)] transition-all duration-300">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-            )}
+            <AnimatePresence initial={false} custom={activeIndex}>
+                <motion.div
+                    key={activeIndex}
+                    className="w-full h-full flex-shrink-0 flex items-center justify-center p-8 relative overflow-hidden"
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUp}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div className="absolute inset-0 z-0">
+                        <img src={activeProduct.story?.imageUrl} alt={`${activeProduct.name} story background`} className="w-full h-full object-cover animate-kenburns" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--background-secondary)] via-[var(--background-secondary)]/70 to-transparent"></div>
+                    </div>
 
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
-                {products.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => scrollToStory(index)}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${activeIndex === index ? 'bg-[var(--primary-accent)] scale-125' : 'bg-[var(--background-tertiary)]/50'}`}
-                        aria-label={`Go to story ${index + 1}`}
-                    />
-                ))}
-            </div>
+                    <div className="relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-center gap-8">
+                        <div className="w-full md:w-1/2 flex items-center justify-center">
+                            <motion.img 
+                                layoutId={`product-image-${activeProduct.id}`}
+                                src={activeProduct.imageUrl} 
+                                alt={activeProduct.name} 
+                                className="max-h-[60vh] w-auto object-contain rounded-lg drop-shadow-2xl" 
+                            />
+                        </div>
+                        <div className="w-full md:w-1/2 text-center md:text-left">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}>
+                                <h2 className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)]" style={{ fontFamily: 'var(--font-family)' }}>
+                                    {activeProduct.story?.title}
+                                </h2>
+                                <h3 className="text-2xl lg:text-3xl mt-1 font-semibold text-[var(--text-primary)]">{activeProduct.name}</h3>
+                            </motion.div>
+                            <motion.p className="mt-4 text-lg text-[var(--text-secondary)] max-w-prose mx-auto md:mx-0" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.4 } }}>
+                                {activeProduct.story?.narrative}
+                            </motion.p>
+                            <motion.div className="mt-6 flex items-center justify-center md:justify-start gap-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.6 } }}>
+                                <p className="text-4xl font-extrabold text-[var(--primary-accent)] tabular-nums">
+                                    ${activeProduct.price.toFixed(2)}
+                                </p>
+                                <button 
+                                    onClick={() => onAddToCart(activeProduct)}
+                                    className="px-6 py-3 bg-[var(--primary-accent)] text-white font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors duration-200 flex items-center gap-2 text-lg shadow-lg add-to-cart-animation"
+                                    aria-label={`Add ${activeProduct.name} to cart`}
+                                >
+                                    <CartIcon className="w-6 h-6" />
+                                    Add to Cart
+                                </button>
+                            </motion.div>
+                        </div>
+                    </div>
+                </motion.div>
+            </AnimatePresence>
+
+             {/* Navigation Buttons */}
+            <button onClick={() => goToStory(activeIndex - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--background-tertiary)]/50 backdrop-blur-sm rounded-full p-3 text-[var(--text-primary)] hover:bg-[var(--primary-accent)] transition-all duration-300 disabled:opacity-0" disabled={activeIndex === 0}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button onClick={() => goToStory(activeIndex + 1)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-[var(--background-tertiary)]/50 backdrop-blur-sm rounded-full p-3 text-[var(--text-primary)] hover:bg-[var(--primary-accent)] transition-all duration-300 disabled:opacity-0" disabled={activeIndex >= products.length - 1}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
         </div>
     );
 };

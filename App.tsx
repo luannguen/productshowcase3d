@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Product, ViewMode, Theme, CartItem, ToastMessage } from './types';
 import { themes } from './constants';
 import ViewSwitcher from './components/ViewSwitcher';
@@ -12,33 +13,95 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 import StoryView from './components/StoryView';
 import ProductManagementModal from './components/ProductManagementModal';
 import PurchaseModal from './components/PurchaseModal';
-import { ManageIcon, CartIcon } from './components/icons';
+import { ManageIcon, CartIcon, CommandIcon, SparklesIcon } from './components/icons';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import SearchBar from './components/SearchBar';
 import FilterPopover from './components/FilterPopover';
 import ProductDetailModal from './components/ProductDetailModal';
 import CartModal from './components/CartModal';
 import ToastContainer from './components/Toast';
-
+import CommandPalette from './components/CommandPalette';
+import ScrollToTopButton from './components/ScrollToTopButton';
+import Tooltip from './components/Tooltip';
 
 const App: React.FC = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Flip);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    return (localStorage.getItem('viewMode') as ViewMode) || ViewMode.Flip;
+  });
   const [appThemes, setAppThemes] = useState(themes);
-  const [activeTheme, setActiveTheme] = useState<Theme>(Theme.Electronics);
-  const [isManageModalOpen, setManageModalOpen] = useState(false);
+  const [activeTheme, setActiveTheme] = useState<Theme>(() => {
+      return (localStorage.getItem('theme') as Theme) || Theme.Electronics;
+  });
   
+  const [isManageModalOpen, setManageModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
-  
-  const [isLoadingView, setIsLoadingView] = useState(false);
+  const [isLoadingView, setIsLoadingView] = useState(true); // Start true for initial load
   const [searchQuery, setSearchQuery] = useState('');
-  
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   const currentThemeData = appThemes[activeTheme];
   const PRODUCTS = currentThemeData.products;
+
+  // Persist user preferences to localStorage
+  useEffect(() => {
+    localStorage.setItem('viewMode', viewMode);
+  }, [viewMode]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', activeTheme);
+  }, [activeTheme]);
+
+  // Handle dynamic background class
+  useEffect(() => {
+    document.body.classList.add('gradient-bg');
+    const style = document.createElement('style');
+    style.innerHTML = `
+      body.gradient-bg {
+        --bg-gradient-1: ${currentThemeData.styles['--bg-gradient-1']};
+        --bg-gradient-2: ${currentThemeData.styles['--bg-gradient-2']};
+        --bg-gradient-3: ${currentThemeData.styles['--bg-gradient-3']};
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+        document.head.removeChild(style);
+    };
+  }, [activeTheme, currentThemeData.styles]);
+
+  // Keyboard shortcuts and scroll listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            setCommandPaletteOpen(isOpen => !isOpen);
+        }
+    };
+
+    const handleScroll = () => {
+        if (window.scrollY > 300) {
+            setShowScrollToTop(true);
+        } else {
+            setShowScrollToTop(false);
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  
+  // Initial load effect
+  useEffect(() => {
+      setTimeout(() => setIsLoadingView(false), 500);
+  }, []);
 
   const maxPrice = useMemo(() => 
     Math.ceil(Math.max(...PRODUCTS.map(p => p.price), 0) / 100) * 100
@@ -65,23 +128,21 @@ const App: React.FC = () => {
     });
   }, [PRODUCTS, searchQuery, priceRange]);
   
-  const handleSetView = (newView: ViewMode) => {
+  const handleSetView = useCallback((newView: ViewMode) => {
     if (newView !== viewMode) {
       setIsLoadingView(true);
       setViewMode(newView);
       setTimeout(() => setIsLoadingView(false), 500);
     }
-  };
+  }, [viewMode]);
   
   const addToast = (message: string) => {
-    const newToast: ToastMessage = {
-        id: Date.now(),
-        message,
-    };
+    const newToast: ToastMessage = { id: Date.now(), message };
     setToasts(prevToasts => [...prevToasts, newToast]);
-    setTimeout(() => {
-        setToasts(prevToasts => prevToasts.filter(toast => toast.id !== newToast.id));
-    }, 3000);
+  };
+
+  const removeToast = (id: number) => {
+      setToasts(prev => prev.filter(t => t.id !== id));
   };
 
   const handleAddToCart = useCallback((product: Product, quantity: number = 1) => {
@@ -114,9 +175,7 @@ const App: React.FC = () => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
   };
   
-  const handleClearCart = () => {
-    setCart([]);
-  };
+  const handleClearCart = () => setCart([]);
   
   const handleCheckout = () => {
     setCartModalOpen(false);
@@ -136,42 +195,31 @@ const App: React.FC = () => {
         );
         return {
             ...currentThemes,
-            [activeTheme]: {
-                ...currentThemes[activeTheme],
-                products: updatedProducts
-            }
+            [activeTheme]: { ...currentThemes[activeTheme], products: updatedProducts }
         };
     });
   };
 
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
+  const handleProductClick = (product: Product) => setSelectedProduct(product);
+  const handleCloseDetailModal = () => setSelectedProduct(null);
+  
+  const surpriseMe = () => {
+      const randomIndex = Math.floor(Math.random() * PRODUCTS.length);
+      handleProductClick(PRODUCTS[randomIndex]);
   };
+
+  const cartItemCount = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
   
-  const handleCloseDetailModal = () => {
-    setSelectedProduct(null);
-  };
-  
-  const cartItemCount = useMemo(() => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  }, [cart]);
-  
-  const isModalOpen = isManageModalOpen || isPurchaseModalOpen || selectedProduct !== null || isCartModalOpen;
+  const isModalOpen = isManageModalOpen || isPurchaseModalOpen || selectedProduct !== null || isCartModalOpen || isCommandPaletteOpen;
   
   useEffect(() => {
     const body = document.body;
-    if (isModalOpen) {
-      body.style.overflow = 'hidden';
-    } else {
-      body.style.overflow = 'auto';
-    }
+    if (isModalOpen) { body.style.overflow = 'hidden'; }
+    else { body.style.overflow = 'auto'; }
   }, [isModalOpen]);
 
-
   const renderView = () => {
-    if (isLoadingView) {
-      return <LoadingSkeleton viewMode={viewMode} />;
-    }
+    if (isLoadingView) return <LoadingSkeleton viewMode={viewMode} />;
     if (filteredProducts.length === 0) {
         return (
           <div className="text-center py-20 bg-[var(--background-secondary)] rounded-[var(--border-radius)]">
@@ -180,23 +228,16 @@ const App: React.FC = () => {
           </div>
         );
     }
+    const props = { products: filteredProducts, onProductClick: handleProductClick, onAddToCart: handleAddToCart };
     switch (viewMode) {
-      case ViewMode.Grid:
-        return <GridView products={filteredProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
-      case ViewMode.List:
-        return <ListView products={filteredProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
-      case ViewMode.Table:
-        return <TableView products={filteredProducts} onProductClick={handleProductClick} />;
-      case ViewMode.Flip:
-        return <FlipView products={filteredProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
-      case ViewMode.Carousel:
-        return <CarouselView products={filteredProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
-      case ViewMode.ThreeD:
-        return <ThreeDView />;
-      case ViewMode.Story:
-        return <StoryView products={filteredProducts.filter(p => p.story)} onAddToCart={handleAddToCart} />;
-      default:
-        return <GridView products={filteredProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
+      case ViewMode.Grid: return <GridView {...props} />;
+      case ViewMode.List: return <ListView {...props} />;
+      case ViewMode.Table: return <TableView products={filteredProducts} onProductClick={handleProductClick} />;
+      case ViewMode.Flip: return <FlipView {...props} />;
+      case ViewMode.Carousel: return <CarouselView {...props} />;
+      case ViewMode.ThreeD: return <ThreeDView />;
+      case ViewMode.Story: return <StoryView products={filteredProducts.filter(p => p.story)} onAddToCart={handleAddToCart} />;
+      default: return <GridView {...props} />;
     }
   };
 
@@ -209,7 +250,7 @@ const App: React.FC = () => {
         <header className="glass-header sticky top-0 z-20 shadow-lg border-b border-white/10">
           <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
             <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] order-1">
-              Product Showcase
+              Showcase
             </h1>
             
             <div className="flex-grow flex items-center justify-center gap-4 order-3 lg:order-2 w-full lg:w-auto">
@@ -221,73 +262,55 @@ const App: React.FC = () => {
                 />
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4 order-2 lg:order-3">
+            <div className="flex items-center gap-2 sm:gap-2 order-2 lg:order-3">
               <ThemeSwitcher currentTheme={activeTheme} setTheme={setActiveTheme} />
               <ViewSwitcher currentView={viewMode} setView={handleSetView} />
-               <button
-                onClick={() => setCartModalOpen(true)}
-                className="relative p-2 rounded-[var(--border-radius)] bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--primary-accent)] hover:text-white transition-all duration-300"
-                aria-label={`Open shopping cart with ${cartItemCount} items`}
-              >
-                <CartIcon className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-xs font-bold ring-2 ring-[var(--background-primary)]">
-                    {cartItemCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setManageModalOpen(true)}
-                className="p-2 rounded-[var(--border-radius)] bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--primary-accent)] hover:text-white transition-all duration-300"
-                aria-label="Manage Products"
-              >
-                <ManageIcon className="w-5 h-5" />
-              </button>
+              <div className="flex items-center bg-[var(--background-tertiary)] rounded-[var(--border-radius)] p-1">
+                <Tooltip text="Surprise Me!">
+                  <motion.button whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }} onClick={surpriseMe} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Select a random product"><SparklesIcon className="w-5 h-5" /></motion.button>
+                </Tooltip>
+                <Tooltip text="Command Palette (Ctrl+K)">
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCommandPaletteOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Open command palette"><CommandIcon className="w-5 h-5" /></motion.button>
+                </Tooltip>
+                 <Tooltip text={`Shopping Cart (${cartItemCount} items)`}>
+                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCartModalOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label={`Open shopping cart`}>
+                     <CartIcon className="w-5 h-5" />
+                     {cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold ring-2 ring-[var(--background-primary)]">{cartItemCount}</span>)}
+                   </motion.button>
+                 </Tooltip>
+                 <Tooltip text="Manage Products">
+                   <motion.button whileHover={{ scale: 1.1, rotate: -5 }} whileTap={{ scale: 0.9 }} onClick={() => setManageModalOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Manage Products"><ManageIcon className="w-5 h-5" /></motion.button>
+                 </Tooltip>
+              </div>
             </div>
           </div>
         </header>
         <main className="container mx-auto px-4 py-8">
-          <div className="transition-opacity duration-500 ease-in-out">
-            {renderView()}
-          </div>
+           <AnimatePresence mode="wait">
+              <motion.div
+                key={viewMode}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {renderView()}
+              </motion.div>
+            </AnimatePresence>
         </main>
         <footer className="text-center py-6 text-[var(--text-secondary)] text-sm">
-          <p>Built with React, TypeScript, and Tailwind CSS. Themed for your delight.</p>
+          <p>Built with React, TypeScript, and Framer Motion. Themed for your delight.</p>
         </footer>
       </div>
 
-      <ToastContainer toasts={toasts} />
+      <ToastContainer toasts={toasts} removeToast={removeToast}/>
       
-      <ProductManagementModal 
-        isOpen={isManageModalOpen}
-        onClose={() => setManageModalOpen(false)}
-        products={PRODUCTS}
-        onUpdateImage={handleUpdateProductImage}
-      />
-      
-      <ProductDetailModal
-        isOpen={selectedProduct !== null}
-        product={selectedProduct}
-        onClose={handleCloseDetailModal}
-        onAddToCart={handleAddToCart}
-      />
-      
-      <CartModal
-        isOpen={isCartModalOpen}
-        onClose={() => setCartModalOpen(false)}
-        cartItems={cart}
-        onUpdateQuantity={handleUpdateCartQuantity}
-        onRemoveItem={handleRemoveFromCart}
-        onClearCart={handleClearCart}
-        onCheckout={handleCheckout}
-      />
-
-       <PurchaseModal
-        isOpen={isPurchaseModalOpen}
-        cart={cart}
-        onClose={() => setPurchaseModalOpen(false)}
-        onPurchaseSuccess={handlePurchaseSuccess}
-      />
+      <ProductManagementModal isOpen={isManageModalOpen} onClose={() => setManageModalOpen(false)} products={PRODUCTS} onUpdateImage={handleUpdateProductImage} />
+      <ProductDetailModal isOpen={selectedProduct !== null} product={selectedProduct} onClose={handleCloseDetailModal} onAddToCart={handleAddToCart} />
+      <CartModal isOpen={isCartModalOpen} onClose={() => setCartModalOpen(false)} cartItems={cart} onUpdateQuantity={handleUpdateCartQuantity} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} onCheckout={handleCheckout} />
+      <PurchaseModal isOpen={isPurchaseModalOpen} cart={cart} onClose={() => setPurchaseModalOpen(false)} onPurchaseSuccess={handlePurchaseSuccess} />
+      <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} setView={handleSetView} setTheme={setActiveTheme} />
+      <ScrollToTopButton isVisible={showScrollToTop} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilterIcon } from './icons';
 
@@ -12,6 +12,9 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({ priceRange, setPriceRange
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  const minPos = (priceRange.min / maxPrice) * 100;
+  const maxPos = (priceRange.max / maxPrice) * 100;
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
@@ -19,20 +22,18 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({ priceRange, setPriceRange
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = Math.min(Number(e.target.value), priceRange.max - 1);
-    setPriceRange({ ...priceRange, min: newMin });
-  };
+  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.min(Number(e.target.value), priceRange.max - 1);
+    setPriceRange({ ...priceRange, min: value });
+  }, [priceRange, setPriceRange]);
   
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = Math.max(Number(e.target.value), priceRange.min + 1);
-    setPriceRange({ ...priceRange, max: newMax });
-  };
+  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(Number(e.target.value), priceRange.min + 1);
+    setPriceRange({ ...priceRange, max: value });
+  }, [priceRange, setPriceRange]);
 
   const resetFilters = () => {
     setPriceRange({ min: 0, max: maxPrice });
@@ -46,7 +47,6 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({ priceRange, setPriceRange
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-[var(--border-radius)] bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--primary-accent)] hover:text-white transition-all duration-300 flex items-center gap-2"
         aria-expanded={isOpen}
-        aria-label="Open filters menu"
       >
         <FilterIcon className="w-5 h-5" />
         {isFilterActive && (
@@ -59,7 +59,7 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({ priceRange, setPriceRange
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            className="absolute top-full right-0 mt-2 w-72 bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-2xl border border-[var(--border-color)] z-30 p-4"
+            className="glass-popover absolute top-full right-0 mt-2 w-72 rounded-[var(--border-radius)] shadow-2xl border border-[var(--border-color)] z-30 p-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -72,35 +72,21 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({ priceRange, setPriceRange
             
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)]">Price Range</label>
-              <div className="flex justify-between text-sm font-semibold text-[var(--text-primary)] mt-2">
+              <div className="flex justify-between text-sm font-semibold text-[var(--text-primary)] mt-2 tabular-nums">
                 <span>${priceRange.min}</span>
                 <span>${priceRange.max}</span>
               </div>
-              <div className="mt-2 space-y-2">
-                <input 
-                  type="range"
-                  min="0"
-                  max={maxPrice}
-                  value={priceRange.min}
-                  onChange={handleMinChange}
-                  className="w-full h-2 bg-[var(--background-tertiary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[var(--primary-accent)] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[var(--background-secondary)] [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-[var(--primary-accent)] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[var(--background-secondary)]"
-                  aria-label="Minimum price"
-                />
-                <input 
-                  type="range"
-                  min="0"
-                  max={maxPrice}
-                  value={priceRange.max}
-                  onChange={handleMaxChange}
-                  className="w-full h-2 bg-[var(--background-tertiary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[var(--primary-accent)] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[var(--background-secondary)] [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-[var(--primary-accent)] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[var(--background-secondary)]"
-                   aria-label="Maximum price"
-                />
+              <div className="mt-2 relative h-5 flex items-center">
+                  <div className="price-slider-track">
+                      <div className="price-slider-range" style={{ left: `${minPos}%`, right: `${100 - maxPos}%` }} />
+                  </div>
+                  <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={handleMinChange} className="price-slider" aria-label="Minimum price" />
+                  <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={handleMaxChange} className="price-slider" aria-label="Maximum price" />
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      {/* FIX: Removed style jsx tag and used Tailwind arbitrary variants and Framer Motion for styling and animation. */}
     </div>
   );
 };
