@@ -10,13 +10,32 @@ import CarouselView from './components/CarouselView';
 import ThreeDView from './components/ThreeDView';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import StoryView from './components/StoryView';
+import ProductManagementModal from './components/ProductManagementModal';
+import { ManageIcon } from './components/icons';
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Flip);
-  const [theme, setTheme] = useState<Theme>(Theme.Electronics);
-  
-  const currentThemeData = themes[theme];
+  const [appThemes, setAppThemes] = useState(themes);
+  const [activeTheme, setActiveTheme] = useState<Theme>(Theme.Electronics);
+  const [isManageModalOpen, setManageModalOpen] = useState(false);
+
+  const currentThemeData = appThemes[activeTheme];
   const PRODUCTS = currentThemeData.products;
+
+  const handleUpdateProductImage = (productId: number, newImageUrl: string) => {
+    setAppThemes(currentThemes => {
+        const updatedProducts = currentThemes[activeTheme].products.map(p =>
+            p.id === productId ? { ...p, imageUrl: newImageUrl } : p
+        );
+        return {
+            ...currentThemes,
+            [activeTheme]: {
+                ...currentThemes[activeTheme],
+                products: updatedProducts
+            }
+        };
+    });
+  };
 
   const renderView = () => {
     switch (viewMode) {
@@ -50,8 +69,15 @@ const App: React.FC = () => {
             Product Showcase
           </h1>
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <ThemeSwitcher currentTheme={theme} setTheme={setTheme} />
+            <ThemeSwitcher currentTheme={activeTheme} setTheme={setActiveTheme} />
             <ViewSwitcher currentView={viewMode} setView={setViewMode} />
+            <button
+              onClick={() => setManageModalOpen(true)}
+              className="p-2 rounded-[var(--border-radius)] bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--primary-accent)] hover:text-white transition-all duration-300"
+              aria-label="Manage Products"
+            >
+              <ManageIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </header>
@@ -63,6 +89,12 @@ const App: React.FC = () => {
        <footer className="text-center py-6 text-[var(--text-secondary)] text-sm">
         <p>Built with React, TypeScript, and Tailwind CSS. Themed for your delight.</p>
       </footer>
+      <ProductManagementModal 
+        isOpen={isManageModalOpen}
+        onClose={() => setManageModalOpen(false)}
+        products={PRODUCTS}
+        onUpdateImage={handleUpdateProductImage}
+      />
     </div>
   );
 };

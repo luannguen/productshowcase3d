@@ -26,7 +26,7 @@ const electronicsProducts: Product[] = [
     name: 'Nova Smartphone',
     description: 'The latest in mobile technology, with a stunning OLED screen and a powerful triple-camera system.',
     price: 999.0,
-    imageUrl: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbf1?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1587560699343-6d15b28536a6?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 3,
@@ -45,7 +45,7 @@ const electronicsProducts: Product[] = [
     name: 'Ergo-Mouse Pro',
     description: 'Ergonomically designed for comfort and precision. Features customizable buttons and adjustable DPI.',
     price: 89.99,
-    imageUrl: 'https://images.unsplash.com/photo-1527814224933-49c2a7c45c13?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1629429408209-1f9122651d37?q=80&w=800&auto=format&fit=crop',
   },
   {
     id: 5,
@@ -73,7 +73,7 @@ const electronicsProducts: Product[] = [
     name: 'Titan Gaming PC',
     description: 'A powerhouse gaming desktop with the latest GPU and CPU for an unparalleled gaming experience.',
     price: 2999.0,
-    imageUrl: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=800&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1598986646512-9213b0ae9387?q=80&w=800&auto=format&fit=crop',
     story: {
         title: "Enter a New Reality",
         narrative: "Beyond the screen lies a universe of infinite possibilities. The Titan Gaming PC is your vessel, a marvel of engineering built to shatter boundaries and redefine immersion. Experience games not as a player, but as a hero living in a world of breathtaking detail and lightning-fast response.",
@@ -84,7 +84,7 @@ const electronicsProducts: Product[] = [
 
 const youthfulProducts: Product[] = [
     { 
-        id: 1, 
+        id: 9, 
         name: 'Vibe Sneakers', 
         description: 'Ultra-comfortable sneakers with a retro-futuristic design.', 
         price: 129.99, 
@@ -95,29 +95,29 @@ const youthfulProducts: Product[] = [
             imageUrl: "https://images.unsplash.com/photo-1528701800487-ba01743862a9?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 2, name: 'Neon Beats Headphones', description: 'Wireless headphones with vibrant LED accents and deep bass.', price: 199.00, imageUrl: 'https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?q=80&w=800&auto=format&fit=crop' },
-    { id: 3, name: 'Pixel Art Display', description: 'A programmable LED display for your desk to show off your pixel art.', price: 249.50, imageUrl: 'https://images.unsplash.com/photo-1626783416743-a833a907102e?q=80&w=800&auto=format&fit=crop' },
+    { id: 10, name: 'Neon Beats Headphones', description: 'Wireless headphones with vibrant LED accents and deep bass.', price: 199.00, imageUrl: 'https://images.unsplash.com/photo-1545127398-14699f92334b?q=80&w=800&auto=format&fit=crop' },
+    { id: 11, name: 'Pixel Art Display', description: 'A programmable LED display for your desk to show off your pixel art.', price: 249.50, imageUrl: 'https://images.unsplash.com/photo-1604502528143-7a6c533446b3?q=80&w=800&auto=format&fit=crop' },
     { 
-        id: 4, 
+        id: 12, 
         name: 'Kickflip Pro Skateboard', 
         description: 'A durable and stylish skateboard for all skill levels.', 
         price: 89.99, 
-        imageUrl: 'https://images.unsplash.com/photo-1547444795-249AB5154d31?q=80&w=800&auto=format&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1547466838-8d43d3a53c8c?q=80&w=800&auto=format&fit=crop',
         story: {
             title: "Define Your Ride",
             narrative: "Feel the grip, hear the roll, and own the pavement. The Kickflip Pro isn't just a board; it's an extension of you. Built for the park, the street, and everywhere in between, it’s your trusted companion for landing that trick you've been practicing for weeks. It’s freedom on four wheels.",
-            imageUrl: "https://images.unsplash.com/photo-1531502594488-873914a1c5b4?q=80&w=1200&auto=format&fit=crop"
+            imageUrl: "https://images.unsplash.com/photo-1559497843-55c3c06a374a?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 5, name: 'Creator Ring Light', description: 'Get perfect lighting for your streams and videos with this versatile ring light.', price: 79.00, imageUrl: 'https://images.unsplash.com/photo-1611931840293-3d44204227c2?q=80&w=800&auto=format&fit=crop' },
-    { id: 6, name: 'Graffiti Art Hoodie', description: 'A comfortable oversized hoodie featuring unique street art designs.', price: 69.99, imageUrl: 'https://images.unsplash.com/photo-1620799140408-edc6d5f96306?q=80&w=800&auto=format&fit=crop' },
-    { id: 7, name: 'RGB Gaming Mouse', description: 'A high-precision gaming mouse with customizable RGB lighting.', price: 59.00, imageUrl: 'https://images.unsplash.com/photo-1615663249853-2d1b8c8014ea?q=80&w=800&auto=format&fit=crop' },
-    { id: 8, name: 'Synthwave Desk Mat', description: 'A large desk mat with a cool, retro synthwave design.', price: 39.00, imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop' },
+    { id: 13, name: 'Creator Ring Light', description: 'Get perfect lighting for your streams and videos with this versatile ring light.', price: 79.00, imageUrl: 'https://images.unsplash.com/photo-1604335293424-73d756c12808?q=80&w=800&auto=format&fit=crop' },
+    { id: 14, name: 'Graffiti Art Hoodie', description: 'A comfortable oversized hoodie featuring unique street art designs.', price: 69.99, imageUrl: 'https://images.unsplash.com/photo-1556819842-15a3a0e1a1b3?q=80&w=800&auto=format&fit=crop' },
+    { id: 15, name: 'RGB Gaming Mouse', description: 'A high-precision gaming mouse with customizable RGB lighting.', price: 59.00, imageUrl: 'https://images.unsplash.com/photo-1600981335960-a2420938a16c?q=80&w=800&auto=format&fit=crop' },
+    { id: 16, name: 'Synthwave Desk Mat', description: 'A large desk mat with a cool, retro synthwave design.', price: 39.00, imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop' },
 ];
 
 const fashionProducts: Product[] = [
     { 
-        id: 1, 
+        id: 17, 
         name: 'Chrono-Elegance Watch', 
         description: 'A timeless timepiece combining classic design with modern mechanics.', 
         price: 1250.00, 
@@ -128,24 +128,24 @@ const fashionProducts: Product[] = [
             imageUrl: "https://images.unsplash.com/photo-1620625515032-6ed2a1438834?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 2, name: 'The Voyager Leather Bag', description: 'A handcrafted leather satchel perfect for the modern professional.', price: 450.00, imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800&auto=format&fit=crop' },
-    { id: 3, name: 'Silk Scarf "Monarch"', description: 'An elegant silk scarf with a vibrant, artistic butterfly print.', price: 120.00, imageUrl: 'https://images.unsplash.com/photo-1563207743-16e6930218b3?q=80&w=800&auto=format&fit=crop' },
+    { id: 18, name: 'The Voyager Leather Bag', description: 'A handcrafted leather satchel perfect for the modern professional.', price: 450.00, imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800&auto=format&fit=crop' },
+    { id: 19, name: 'Silk Scarf "Monarch"', description: 'An elegant silk scarf with a vibrant, artistic butterfly print.', price: 120.00, imageUrl: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800&auto=format&fit=crop' },
     { 
-        id: 4, 
+        id: 20, 
         name: 'Trench Coat "London Fog"', 
         description: 'A classic, all-weather trench coat that never goes out of style.', 
         price: 380.00, 
-        imageUrl: 'https://images.unsplash.com/photo-1574653434127-1634c4dfa773?q=80&w=800&auto=format&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1517942491322-1c6ada40a2c0?q=80&w=800&auto=format&fit=crop',
         story: {
             title: "The Signature of Style",
             narrative: "Through misty mornings and rain-slicked city streets, the London Fog trench coat is your shield of sophistication. Its iconic silhouette whispers tales of timeless elegance and quiet confidence. It's more than a coat—it's an armor of grace for the modern romantic.",
             imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 5, name: 'Velvet Evening Gown', description: 'A stunning, floor-length velvet gown for special occasions.', price: 600.00, imageUrl: 'https://images.unsplash.com/photo-1590800179187-434a9b6c0e5a?q=80&w=800&auto=format&fit=crop' },
-    { id: 6, name: 'Suede Ankle Boots', description: 'Stylish and comfortable suede boots that complement any outfit.', price: 180.00, imageUrl: 'https://images.unsplash.com/photo-1605733513594-2a62867f7992?q=80&w=800&auto=format&fit=crop' },
-    { id: 7, name: 'Designer Sunglasses', description: 'Protect your eyes in style with these chic, oversized sunglasses.', price: 250.00, imageUrl: 'https://images.unsplash.com/photo-1577803645773-f9e4745ce7f6?q=80&w=800&auto=format&fit=crop' },
-    { id: 8, name: 'Cashmere Sweater', description: 'Experience ultimate comfort and luxury with this 100% cashmere sweater.', price: 300.00, imageUrl: 'https://images.unsplash.com/photo-1588439401314-8a4e3a35a782?q=80&w=800&auto=format&fit=crop' },
+    { id: 21, name: 'Velvet Evening Gown', description: 'A stunning, floor-length velvet gown for special occasions.', price: 600.00, imageUrl: 'https://images.unsplash.com/photo-1595509553306-932f91b6c771?q=80&w=800&auto=format&fit=crop' },
+    { id: 22, name: 'Suede Ankle Boots', description: 'Stylish and comfortable suede boots that complement any outfit.', price: 180.00, imageUrl: 'https://images.unsplash.com/photo-1519758369395-97995f54032b?q=80&w=800&auto=format&fit=crop' },
+    { id: 23, name: 'Designer Sunglasses', description: 'Protect your eyes in style with these chic, oversized sunglasses.', price: 250.00, imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&auto=format&fit=crop' },
+    { id: 24, name: 'Cashmere Sweater', description: 'Experience ultimate comfort and luxury with this 100% cashmere sweater.', price: 300.00, imageUrl: 'https://images.unsplash.com/photo-1620799140159-48301732642a?q=80&w=800&auto=format&fit=crop' },
 ];
 
 
