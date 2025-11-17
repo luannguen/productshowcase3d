@@ -71,7 +71,18 @@ const ListView: React.FC<ListViewProps> = React.memo((props) => {
   return (
     <div className="space-y-4">
       {props.products.map((product) => (
-        <ListItem key={product.id} {...props} product={product} />
+        <ListItem
+            key={product.id}
+            product={product}
+            searchQuery={props.searchQuery}
+            onProductClick={props.onProductClick}
+            onAddToCart={props.onAddToCart}
+            onQuickView={props.onQuickView}
+            onToggleWishlist={props.onToggleWishlist}
+            isProductInWishlist={props.isProductInWishlist}
+            onToggleCompare={props.onToggleCompare}
+            isProductInCompare={props.isProductInCompare}
+        />
       ))}
     </div>
   );

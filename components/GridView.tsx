@@ -95,7 +95,16 @@ const GridView: React.FC<GridViewProps> = React.memo((props) => {
         <div key={product.id} className="interactive-border">
           <BaseCard onClick={() => props.onProductClick(product)} reduceMotion={props.reduceMotion}>
             <div className="bg-[var(--background-secondary)] rounded-[var(--border-radius)] overflow-hidden shadow-lg flex flex-col h-full">
-              <ProductCardContent {...props} product={product} />
+              <ProductCardContent
+                product={product}
+                onAddToCart={props.onAddToCart}
+                searchQuery={props.searchQuery}
+                onQuickView={props.onQuickView}
+                onToggleWishlist={props.onToggleWishlist}
+                isProductInWishlist={props.isProductInWishlist}
+                onToggleCompare={props.onToggleCompare}
+                isProductInCompare={props.isProductInCompare}
+              />
             </div>
           </BaseCard>
         </div>

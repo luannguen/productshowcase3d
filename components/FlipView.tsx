@@ -78,7 +78,16 @@ const FlipView: React.FC<FlipViewProps> = React.memo((props) => {
         <div key={product.id} className="interactive-border">
           <BaseCard onClick={() => props.onProductClick(product)} reduceMotion={props.reduceMotion}>
             <div className="group">
-              <FlipCard {...props} product={product} />
+              <FlipCard
+                product={product}
+                onProductClick={props.onProductClick}
+                onAddToCart={props.onAddToCart}
+                onQuickView={props.onQuickView}
+                onToggleWishlist={props.onToggleWishlist}
+                isProductInWishlist={props.isProductInWishlist}
+                onToggleCompare={props.onToggleCompare}
+                isProductInCompare={props.isProductInCompare}
+              />
             </div>
           </BaseCard>
         </div>
