@@ -20,12 +20,12 @@ export interface Product {
     imageUrl: string;
     videoUrl?: string;
   };
-  // New properties for advanced features
   stock: {
     level: 'in-stock' | 'low' | 'out-of-stock';
     quantity: number;
   };
   colors?: string[]; // hex codes
+  priceHistory?: PriceDataPoint[];
 }
 
 export interface CartItem {
@@ -46,6 +46,7 @@ export enum ViewMode {
   Carousel = '3D Carousel',
   ThreeD = '3D View',
   Story = 'Story',
+  ForYou = 'For You',
 }
 
 export enum Theme {
@@ -56,7 +57,6 @@ export enum Theme {
 
 export type SortOption = 'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'rating-desc' | 'newest-desc';
 
-// New types for enhancements
 export type QuickViewProduct = Product | null;
 export type WishlistItem = Product;
 export type RecentlyViewedItem = Product;
@@ -67,11 +67,11 @@ export type ChatMessage = {
   id: string; 
 };
 
-// Dark Mode & i18n
 export enum Appearance {
     Light = 'light',
     Dark = 'dark',
     System = 'system',
+    HighContrast = 'high-contrast',
 }
 
 export type Locale = 'en' | 'vi';
@@ -82,7 +82,6 @@ export type Translations = {
     };
 };
 
-// New types for 20 more features
 export interface OnboardingStep {
   element: string; // CSS selector
   title: string;
@@ -92,4 +91,31 @@ export interface OnboardingStep {
 export interface BreadcrumbItem {
   label: string;
   onClick?: () => void;
+}
+
+// New types for 10 more features
+export interface Notification {
+  id: string;
+  type: 'stock' | 'promo' | 'general';
+  title: string;
+  message: string;
+  read: boolean;
+  timestamp: number;
+  productId?: number;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  productIds: number[];
+}
+
+export interface PriceDataPoint {
+  date: string; // YYYY-MM-DD
+  price: number;
+}
+
+export interface VoiceCommand {
+  keyword: string[];
+  action: (param?: string) => void;
 }

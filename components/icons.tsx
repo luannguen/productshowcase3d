@@ -48,6 +48,13 @@ export const StoryIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
     </svg>
 );
 
+export const UserIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+  </svg>
+);
+
+
 export const ManageIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -245,4 +252,40 @@ export const MinimizeIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => 
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 4H4v4m12 0h4V4M8 20H4v-4m12 0h4v-4" />
     </svg>
+);
+
+export const BellIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+  </svg>
+);
+
+export const GiftIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+  </svg>
+);
+
+export const BookmarkIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+  </svg>
+);
+
+export const MicIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+  </svg>
+);
+
+export const LineChartIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15v4m0 0h4m-4 0l5-5 4 4L19 7l-4 4"></path>
+  </svg>
+);
+
+export const FlameIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.675-.8 1.6-1.148 2.502A5.997 5.997 0 006 11a5 5 0 005 5c.42 0 .834-.066 1.234-.186.401-.12.82-.296 1.233-.518a1 1 0 00.433-1.451l-2-3.636a1 1 0 00-1.452-.385l-.75.428a1 1 0 00-.386 1.451l1.23 2.247a3.997 3.997 0 01-2.28.626a3 3 0 01-3-3 3.997 3.997 0 012.28-2.626c.401-.22.82-.397 1.233-.518.401-.12.834-.186 1.234-.186a5 5 0 004.717-3.236l-2-3.637a1 1 0 00-1.45-.385l-.75.428a1 1 0 00-.386 1.451l1.23 2.247A3.997 3.997 0 0112 7a3 3 0 01-3-3c0-.42.066-.834.186-1.234.12-.401.296-.82.518-1.233a1 1 0 00-.385-1.452z" clipRule="evenodd"/>
+  </svg>
 );

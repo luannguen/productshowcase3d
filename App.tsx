@@ -213,6 +213,15 @@ const AppContent: React.FC = () => {
     addToast(`${product.name} ${t('addedToCart')}`);
   }, [reduceMotion, t]);
 
+  // FIX: Add missing `onAddToCollection` and `onNotifyMe` handlers required by view components.
+  const handleAddToCollection = useCallback((product: Product) => {
+    addToast(`${product.name} has been added to a collection.`);
+  }, []);
+
+  const handleNotifyMe = useCallback((product: Product) => {
+    addToast(`You'll be notified when ${product.name} is back in stock.`);
+  }, []);
+
   useEffect(() => {
     if (flyingImage) {
       const cartRect = cartIconRef.current?.getBoundingClientRect();
@@ -275,7 +284,8 @@ const AppContent: React.FC = () => {
         </div>
       );
     }
-    const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist, onToggleCompare: handleToggleCompare, isProductInCompare };
+    // FIX: Pass the new handlers `onAddToCollection` and `onNotifyMe` to the view components.
+    const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist, onToggleCompare: handleToggleCompare, isProductInCompare, onAddToCollection: handleAddToCollection, onNotifyMe: handleNotifyMe };
     const viewProps = { ...baseProps, products: paginatedProducts, reduceMotion };
     const viewPropsWithSearch = { ...viewProps, searchQuery: debouncedSearchQuery };
 

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '../types';
 import BaseModal from './BaseModal';
-import { CartIcon, StarIcon, CheckIcon, ShareIcon } from './icons';
+import { CartIcon, StarIcon, CheckIcon, ShareIcon, LineChartIcon } from './icons';
 import ImageWithSkeleton from './ImageWithSkeleton';
+import PriceHistoryChart from './PriceHistoryChart';
 
 interface ProductDetailModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ interface ProductDetailModalProps {
   onProductClick: (product: Product) => void;
 }
 
-type Tab = 'details' | 'specifications' | 'reviews';
+type Tab = 'details' | 'specifications' | 'reviews' | 'priceHistory';
 type ActiveMedia = 'image' | 'video';
 
 const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product, allProducts, onClose, onAddToCart, onBuyNow, onProductClick }) => {
@@ -76,6 +77,8 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product
             return <div className="space-y-3 text-sm">{product.specifications ? Object.entries(product.specifications).map(([key, value]) => (<div key={key} className="grid grid-cols-2 gap-4 border-b border-[var(--border-color)] pb-3"><dt className="font-medium text-[var(--text-secondary)]">{key}</dt><dd className="text-[var(--text-primary)]">{value}</dd></div>)) : <p>No specifications available.</p>}</div>;
         case 'reviews':
             return <div className="space-y-6">{product.reviews && product.reviews.length > 0 ? product.reviews.map(review => (<div key={review.id}><div className="flex items-center gap-2"><div className="flex text-yellow-400">{[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-600'}`} />)}</div><span className="font-bold text-[var(--text-primary)]">{review.author}</span></div><p className="mt-2 text-[var(--text-secondary)] text-sm">{review.comment}</p></div>)) : <p>No reviews yet.</p>}</div>;
+        case 'priceHistory':
+            return product.priceHistory ? <PriceHistoryChart data={product.priceHistory} /> : <p>No price history available.</p>;
         case 'details':
         default:
             return <motion.p variants={childVariants} className="text-[var(--text-secondary)] leading-relaxed">{product.description}</motion.p>;
@@ -112,7 +115,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product
               <p className="text-3xl lg:text-4xl font-extrabold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
               <div className="flex items-center border border-[var(--border-color)] rounded-[var(--border-radius)] w-fit">
                   <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleQuantityChange(-1)} className="px-3 py-1.5 text-[var(--text-secondary)] hover:bg-[var(--background-tertiary)] rounded-l-[var(--border-radius)]" aria-label="Decrement quantity">-</motion.button>
-                  <AnimatePresence mode="popLayout"><motion.span key={quantity} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 10, opacity: 0 }} transition={{ duration: 0.15 }} className="px-4 font-bold text-lg text-[var(--text-primary)] tabular-nums">{quantity}</motion.span></AnimatePresence>
+                  <AnimatePresence mode="popLayout"><motion.span key={quantity} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 10, opacity: 0 }} transition={{ duration: 0.15 }} className="px-4 font-bold text-lg text-[var(--text-primary)] tabular-nums">{quantity}</span></AnimatePresence>
                   <motion.button whileTap={{ scale: 0.9 }} onClick={() => handleQuantityChange(1)} className="px-3 py-1.5 text-[var(--text-secondary)] hover:bg-[var(--background-tertiary)] rounded-r-[var(--border-radius)]" aria-label="Increment quantity">+</motion.button>
               </div>
           </motion.div>
@@ -122,6 +125,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product
                 <button onClick={() => setActiveTab('details')} className={`product-modal-tab ${activeTab === 'details' ? 'active' : ''}`}>Details</button>
                 {product.specifications && <button onClick={() => setActiveTab('specifications')} className={`product-modal-tab ${activeTab === 'specifications' ? 'active' : ''}`}>Specifications</button>}
                 {product.reviews && <button onClick={() => setActiveTab('reviews')} className={`product-modal-tab ${activeTab === 'reviews' ? 'active' : ''}`}>Reviews</button>}
+                {product.priceHistory && <button onClick={() => setActiveTab('priceHistory')} className={`product-modal-tab ${activeTab === 'priceHistory' ? 'active' : ''}`}>Price History</button>}
             </nav>
           </div>
           

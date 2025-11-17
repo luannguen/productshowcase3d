@@ -1,5 +1,7 @@
 {
   "name": "React 3D Product Showcase",
   "description": "An interactive product showcase built with React and Tailwind CSS, featuring multiple view modes including 3D Flip, 3D Carousel, Grid, List, Table, and an embedded 3D model viewer.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

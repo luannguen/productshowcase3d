@@ -18,9 +18,9 @@ interface SettingsModalProps {
 
 const AppearanceControl: React.FC<Pick<SettingsModalProps, 'appearance' | 'setAppearance'>> = ({ appearance, setAppearance }) => (
   <div className="flex gap-2 p-1 bg-[var(--background-tertiary)] rounded-[var(--border-radius)]">
-    {(['light', 'dark', 'system'] as Appearance[]).map(app => (
+    {(['light', 'dark', 'system', 'high-contrast'] as Appearance[]).map(app => (
       <button key={app} onClick={() => setAppearance(app)} className={`flex-1 py-1.5 px-3 text-sm font-semibold rounded-md capitalize transition-colors ${appearance === app ? 'bg-[var(--primary-accent)] text-[var(--badge-text-color)]' : 'hover:bg-[var(--border-color)]'}`}>
-        {app}
+        {app.replace('-', ' ')}
       </button>
     ))}
   </div>

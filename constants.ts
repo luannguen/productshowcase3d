@@ -1,10 +1,10 @@
 import React from 'react';
-import { Product, Theme, Translations } from './types';
+import { Product, Theme, Translations, Notification } from './types';
 
 interface ThemeStyles {
-  // FIX: Allow any string key to support custom CSS properties (e.g., --font-family).
   light: React.CSSProperties & { [key: string]: any };
   dark: React.CSSProperties & { [key: string]: any };
+  'high-contrast': React.CSSProperties & { [key: string]: any };
 }
 
 interface AppTheme {
@@ -40,7 +40,13 @@ const electronicsProducts: Product[] = [
         narrative: "From the first spark of an idea to the final render, the Quantum Laptop is your silent partner. Engineered for the ambitious, its power flows as fast as your thoughts, turning complex code into seamless reality and wild dreams into stunning visuals. This isn't just a machine; it's the canvas for your next masterpiece.",
         imageUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=1200&auto=format&fit=crop",
         videoUrl: 'https://videos.pexels.com/video-files/5901323/5901323-hd_1920_1080_30fps.mp4'
-    }
+    },
+    priceHistory: [
+      { date: '2023-01-01', price: 1599.99 },
+      { date: '2023-03-15', price: 1549.99 },
+      { date: '2023-06-01', price: 1499.99 },
+      { date: '2023-09-01', price: 1499.99 },
+    ]
   },
   {
     id: 2,
@@ -554,6 +560,30 @@ const sharedDarkStyles = {
     '--badge-text-color': '#FFFFFF',
 };
 
+const highContrastStyles = {
+    ...sharedDarkStyles,
+    '--font-family': "'Poppins', sans-serif",
+    '--background-primary': '#000000',
+    '--background-primary-translucent': 'rgba(0, 0, 0, 0.8)',
+    '--background-secondary': '#1a1a1a',
+    '--background-tertiary': '#333333',
+    '--text-primary': '#ffffff',
+    '--text-secondary': '#e6e6e6',
+    '--text-tertiary': '#cccccc',
+    '--primary-accent': '#ffff00', // Yellow
+    '--primary-accent-hover': '#ffdd00',
+    '--primary-accent-aurora': 'rgba(255, 255, 0, 0.2)',
+    '--border-color': '#666666',
+    '--border-radius': '0.25rem',
+    '--header-gradient-from': '#ffff00',
+    '--header-gradient-to': '#00ffff', // Cyan
+    '--bg-gradient-1': '#000000',
+    '--bg-gradient-2': '#0a0a0a',
+    '--bg-gradient-3': '#000000',
+    '--badge-text-color': '#000000', // Black text on bright badges
+};
+
+
 export const themes: Record<Theme, AppTheme> = {
   [Theme.Electronics]: {
     products: electronicsProducts,
@@ -600,6 +630,7 @@ export const themes: Record<Theme, AppTheme> = {
         '--bg-gradient-2': '#1e293b',
         '--bg-gradient-3': '#132a4a',
       },
+      'high-contrast': highContrastStyles,
     },
   },
   [Theme.Youthful]: {
@@ -647,6 +678,7 @@ export const themes: Record<Theme, AppTheme> = {
             '--bg-gradient-2': '#16213e',
             '--bg-gradient-3': '#2e1a2a',
         },
+        'high-contrast': highContrastStyles,
     },
   },
   [Theme.Fashion]: {
@@ -694,6 +726,7 @@ export const themes: Record<Theme, AppTheme> = {
         '--bg-gradient-2': '#4a4a4a',
         '--bg-gradient-3': '#1c1c1c',
       },
+      'high-contrast': highContrastStyles,
     },
   },
 };
@@ -745,3 +778,14 @@ export const translations: Translations = {
     'copyright': '© {year} Showcase. Mọi quyền được bảo lưu.',
   }
 };
+
+export const initialNotifications: Notification[] = [
+    {
+        id: 'welcome-1',
+        type: 'general',
+        title: 'Welcome to the Showcase!',
+        message: 'Explore our new features like AI Stylist and Voice Navigation.',
+        read: false,
+        timestamp: Date.now() - 1000 * 60 * 5, // 5 minutes ago
+    }
+];

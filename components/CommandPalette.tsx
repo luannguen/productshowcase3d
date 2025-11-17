@@ -28,6 +28,8 @@ const viewIcons: Record<ViewMode, React.FC<{ className?: string }>> = {
     [ViewMode.Carousel]: Icons.CarouselIcon,
     [ViewMode.ThreeD]: Icons.ThreeDIcon,
     [ViewMode.Story]: Icons.StoryIcon,
+    // FIX: Added missing entry for 'ForYou' view mode to satisfy the Record type.
+    [ViewMode.ForYou]: Icons.UserIcon,
 };
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setView, setTheme }) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ViewMode } from '../types';
-import { GridIcon, ListIcon, TableIcon, FlipIcon, CarouselIcon, ThreeDIcon, StoryIcon } from './icons';
+import { GridIcon, ListIcon, TableIcon, FlipIcon, CarouselIcon, ThreeDIcon, StoryIcon, UserIcon } from './icons';
 import Tooltip from './Tooltip';
 
 interface ViewSwitcherProps {
@@ -10,6 +10,7 @@ interface ViewSwitcherProps {
 }
 
 const viewOptions = [
+  { mode: ViewMode.ForYou, Icon: UserIcon },
   { mode: ViewMode.Story, Icon: StoryIcon },
   { mode: ViewMode.Flip, Icon: FlipIcon },
   { mode: ViewMode.Carousel, Icon: CarouselIcon },
