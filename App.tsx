@@ -24,6 +24,7 @@ import CommandPalette from './components/CommandPalette';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import Tooltip from './components/Tooltip';
 import AccessibilityAnnouncer from './components/AccessibilityAnnouncer';
+import CustomCursor from './components/CustomCursor';
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -71,6 +72,10 @@ const App: React.FC = () => {
         --bg-gradient-1: ${currentThemeData.styles['--bg-gradient-1']};
         --bg-gradient-2: ${currentThemeData.styles['--bg-gradient-2']};
         --bg-gradient-3: ${currentThemeData.styles['--bg-gradient-3']};
+      }
+      ::selection {
+        background-color: ${currentThemeData.styles['--primary-accent']};
+        color: ${currentThemeData.styles['--background-primary']};
       }
     `;
     document.head.appendChild(style);
@@ -248,6 +253,18 @@ const App: React.FC = () => {
         };
     });
   };
+  
+  const handleUpdateProductDescription = (productId: number, newDescription: string) => {
+    setAppThemes(currentThemes => {
+        const updatedProducts = currentThemes[activeTheme].products.map(p =>
+            p.id === productId ? { ...p, description: newDescription } : p
+        );
+        return {
+            ...currentThemes,
+            [activeTheme]: { ...currentThemes[activeTheme], products: updatedProducts }
+        };
+    });
+  };
 
   const handleProductClick = (product: Product) => setSelectedProduct(product);
   const handleCloseDetailModal = () => setSelectedProduct(null);
@@ -297,8 +314,9 @@ const App: React.FC = () => {
         style={currentThemeData.styles}
         className={`min-h-screen bg-transparent text-[var(--text-primary)] font-sans transition-colors duration-500`}
     >
+      <CustomCursor />
       <AccessibilityAnnouncer message={announcerMessage} />
-      <div className={`${isModalOpen ? 'modal-open-blur' : ''}`}>
+      <div className={`main-content-wrapper ${isModalOpen ? 'modal-open-blur' : ''}`}>
         <header className="glass-header sticky top-0 z-20 shadow-lg border-b border-white/10">
           <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
             <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] order-1">
@@ -362,7 +380,7 @@ const App: React.FC = () => {
 
       <ToastContainer toasts={toasts} removeToast={removeToast}/>
       
-      <ProductManagementModal isOpen={isManageModalOpen} onClose={() => setManageModalOpen(false)} products={PRODUCTS} onUpdateImage={handleUpdateProductImage} />
+      <ProductManagementModal isOpen={isManageModalOpen} onClose={() => setManageModalOpen(false)} products={PRODUCTS} onUpdateImage={handleUpdateProductImage} onUpdateDescription={handleUpdateProductDescription} />
       <ProductDetailModal isOpen={selectedProduct !== null} product={selectedProduct} onClose={handleCloseDetailModal} onAddToCart={handleAddToCart} />
       <CartModal isOpen={isCartModalOpen} onClose={() => setCartModalOpen(false)} cartItems={cart} onUpdateQuantity={handleUpdateCartQuantity} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} onCheckout={handleCheckout} />
       <PurchaseModal isOpen={isPurchaseModalOpen} cart={cart} onClose={() => setPurchaseModalOpen(false)} onPurchaseSuccess={handlePurchaseSuccess} />

@@ -124,7 +124,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                     <div className="absolute inset-0 z-0">
                         {activeProduct.story?.videoUrl ? (
                             <video
-                                key={activeProduct.story.videoUrl}
+                                key={activeProduct.id}
                                 src={activeProduct.story.videoUrl}
                                 className="w-full h-full object-cover"
                                 autoPlay

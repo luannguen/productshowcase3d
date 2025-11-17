@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   imageUrl: string;
   category: string;
+  tags?: ('New' | 'Best Seller')[];
   videoUrl?: string;
   specifications?: Record<string, string>;
   reviews?: {

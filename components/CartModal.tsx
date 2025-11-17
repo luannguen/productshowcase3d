@@ -39,10 +39,12 @@ const CartModal: React.FC<CartModalProps> = ({
     <BaseModal isOpen={isOpen} onClose={onClose} title={`Your Cart (${totalItems} items)`}>
       <div className="p-6 flex flex-col h-full">
         {cartItems.length === 0 ? (
-          <div className="flex-grow flex flex-col items-center justify-center text-center">
-            <CartIcon className="w-16 h-16 text-[var(--text-tertiary)] mb-4" />
+          <div className="flex-grow flex flex-col items-center justify-center text-center p-4">
+            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-[var(--background-tertiary)] mb-6">
+                <CartIcon className="w-12 h-12 text-[var(--primary-accent)]" />
+            </div>
             <h3 className="text-xl font-semibold text-[var(--text-primary)]">Your cart is empty</h3>
-            <p className="text-[var(--text-secondary)] mt-1">Looks like you haven't added anything yet.</p>
+            <p className="text-[var(--text-secondary)] mt-1 max-w-xs">Looks like you haven't added anything yet. Let's find something you'll love!</p>
             <button
               onClick={onClose}
               className="mt-6 px-6 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors"
@@ -52,7 +54,7 @@ const CartModal: React.FC<CartModalProps> = ({
           </div>
         ) : (
           <>
-            <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4">
+            <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4 no-scrollbar">
               <AnimatePresence>
                 {cartItems.map(({ product, quantity }) => (
                   <motion.div
@@ -66,17 +68,17 @@ const CartModal: React.FC<CartModalProps> = ({
                     <img src={product.imageUrl} alt={product.name} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
                     <div className="flex-grow">
                       <h4 className="font-semibold text-[var(--text-primary)]">{product.name}</h4>
-                      <p className="text-sm text-[var(--text-secondary)]">${product.price.toFixed(2)}</p>
+                      <p className="text-sm text-[var(--text-secondary)] tabular-nums">${product.price.toFixed(2)}</p>
                       <div className="flex items-center mt-2">
                          <div className="flex items-center border border-[var(--border-color)] rounded-[var(--border-radius)]">
                            <button onClick={() => onUpdateQuantity(product.id, quantity - 1)} className="px-2 py-1 text-sm">-</button>
-                           <span className="px-3 text-sm font-medium">{quantity}</span>
+                           <span className="px-3 text-sm font-medium tabular-nums">{quantity}</span>
                            <button onClick={() => onUpdateQuantity(product.id, quantity + 1)} className="px-2 py-1 text-sm">+</button>
                          </div>
                       </div>
                     </div>
                     <div className="text-right">
-                        <p className="font-bold text-[var(--text-primary)]">${(product.price * quantity).toFixed(2)}</p>
+                        <p className="font-bold text-[var(--text-primary)] tabular-nums">${(product.price * quantity).toFixed(2)}</p>
                         <button onClick={() => onRemoveItem(product.id)} className="text-[var(--text-secondary)] hover:text-red-500 transition-colors mt-2">
                            <TrashIcon className="w-5 h-5"/>
                         </button>
@@ -90,15 +92,15 @@ const CartModal: React.FC<CartModalProps> = ({
                 <div className="space-y-2 text-sm mb-4">
                     <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)]">Subtotal</span>
-                        <span className="font-medium text-[var(--text-primary)]">${subtotal.toFixed(2)}</span>
+                        <span className="font-medium text-[var(--text-primary)] tabular-nums">${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-[var(--text-secondary)]">Shipping</span>
-                        <span className="font-medium text-[var(--text-primary)]">$9.99</span>
+                        <span className="font-medium text-[var(--text-primary)] tabular-nums">$9.99</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold">
                         <span className="text-[var(--text-primary)]">Total</span>
-                        <span className="text-[var(--primary-accent)]">${total.toFixed(2)}</span>
+                        <span className="text-[var(--primary-accent)] tabular-nums">${total.toFixed(2)}</span>
                     </div>
                 </div>
               <div className="flex justify-between items-center gap-4">

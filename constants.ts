@@ -15,6 +15,7 @@ const electronicsProducts: Product[] = [
     price: 1499.99,
     imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&auto=format&fit=crop',
     category: 'Laptops',
+    tags: ['New'],
     videoUrl: 'https://videos.pexels.com/video-files/3214532/3214532-hd_1920_1080_25fps.mp4',
     specifications: {
       'Processor': 'Quantum Core i9',
@@ -41,6 +42,17 @@ const electronicsProducts: Product[] = [
     price: 999.0,
     imageUrl: 'https://images.unsplash.com/photo-1587560699343-6d15b28536a6?q=80&w=800&auto=format&fit=crop',
     category: 'Smartphones',
+    specifications: {
+        'Display': '6.7-inch Super Retina XDR OLED',
+        'Camera': 'Triple 12MP system (Ultra Wide, Wide, Telephoto)',
+        'Processor': 'A16 Bionic Chip',
+        'Battery': 'Up to 28 hours video playback',
+        'Storage': '256GB',
+    },
+    reviews: [
+        { id: 1, author: 'Mike P.', rating: 5, comment: 'The camera is incredible, especially in low light. The screen is gorgeous.' },
+        { id: 2, author: 'Sara K.', rating: 4, comment: 'Super fast and responsive. A worthy upgrade.' },
+    ],
   },
   {
     id: 3,
@@ -49,6 +61,18 @@ const electronicsProducts: Product[] = [
     price: 349.50,
     imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop',
     category: 'Audio',
+    tags: ['Best Seller'],
+    specifications: {
+        'Type': 'Over-ear, closed-back',
+        'Connectivity': 'Bluetooth 5.2, 3.5mm audio jack',
+        'Battery Life': 'Up to 30 hours with ANC',
+        'Features': 'Active Noise Cancellation, Transparency Mode, Spatial Audio',
+        'Weight': '254g',
+    },
+    reviews: [
+        { id: 1, author: 'David L.', rating: 5, comment: 'The noise cancellation is magic. I can finally focus in my open office.' },
+        { id: 2, author: 'Chloe R.', rating: 5, comment: 'Sound quality is top-notch. They are also super comfortable for long listening sessions.' },
+    ],
     story: {
         title: "Find Your Focus",
         narrative: "Silence the world and dive into pure sound. The Aura Headphones create a sanctuary for your senses, where every note is crisp and every beat is profound. Whether you're finding your rhythm in a bustling city or seeking tranquility, Aura is your escape to an immersive world of audio.",
@@ -63,6 +87,17 @@ const electronicsProducts: Product[] = [
     price: 89.99,
     imageUrl: 'https://images.unsplash.com/photo-1629429408209-1f9122651d37?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    specifications: {
+        'Sensor': 'Optical',
+        'DPI': '200 - 16,000',
+        'Buttons': '8 programmable buttons',
+        'Connectivity': '2.4GHz Wireless, Bluetooth',
+        'Ergonomics': 'Right-handed vertical design',
+    },
+    reviews: [
+        { id: 1, author: 'GamerX', rating: 5, comment: 'Perfect for long gaming sessions. Super precise and the customizable buttons are a game-changer.' },
+        { id: 2, author: 'OfficeWorker', rating: 5, comment: 'My wrist pain is gone! Took a day to get used to, but now I can\'t go back.' },
+    ],
   },
   {
     id: 5,
@@ -71,6 +106,17 @@ const electronicsProducts: Product[] = [
     price: 169.0,
     imageUrl: 'https://images.unsplash.com/photo-1593106578502-28fa75da9d99?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    specifications: {
+        'Resolution': '1080p / 60fps',
+        'Focus Type': 'Autofocus',
+        'Field of View': '78 degrees',
+        'Microphone': 'Dual omni-directional',
+        'Connectivity': 'USB-C',
+    },
+    reviews: [
+        { id: 1, author: 'StreamQueen', rating: 5, comment: 'The video quality is amazing, my stream has never looked better.' },
+        { id: 2, author: 'RemoteWorker', rating: 5, comment: 'Makes me look so much more professional in Zoom meetings. The auto-exposure is fantastic.' },
+    ],
   },
   {
     id: 6,
@@ -79,6 +125,17 @@ const electronicsProducts: Product[] = [
     price: 199.99,
     imageUrl: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    specifications: {
+        'Switch Type': 'Tactile Brown Switches',
+        'Layout': 'Tenkeyless (87 keys)',
+        'Backlighting': 'Per-key RGB',
+        'Connectivity': 'Wired (USB-C)',
+        'Frame': 'Anodized Aluminum',
+    },
+    reviews: [
+        { id: 1, author: 'CodeWizard', rating: 5, comment: 'The typing experience is a dream. Solid build quality and the RGB is a nice touch.' },
+        { id: 2, author: 'ProGamer', rating: 4, comment: 'Great keyboard for gaming, very responsive. Wish it had a wireless option.' },
+    ],
   },
   {
     id: 7,
@@ -87,6 +144,17 @@ const electronicsProducts: Product[] = [
     price: 249.0,
     imageUrl: 'https://images.unsplash.com/photo-1544117519-31a4b719223d?q=80&w=800&auto=format&fit=crop',
     category: 'Wearables',
+    specifications: {
+        'Display': '1.4-inch AMOLED',
+        'Compatibility': 'iOS and Android',
+        'Sensors': 'Heart Rate, SpO2, GPS',
+        'Battery Life': 'Up to 14 days',
+        'Water Resistance': '5 ATM',
+    },
+    reviews: [
+        { id: 1, author: 'FitFreak', rating: 5, comment: 'Love this watch for tracking my runs. The GPS is accurate and the battery lasts forever.' },
+        { id: 2, author: 'BusyBee', rating: 4, comment: 'Looks great and the notifications are super helpful. The app ecosystem could be a bit larger.' },
+    ],
   },
   {
     id: 8,
@@ -95,6 +163,18 @@ const electronicsProducts: Product[] = [
     price: 2999.0,
     imageUrl: 'https://images.unsplash.com/photo-1598986646512-9213b0ae9387?q=80&w=800&auto=format&fit=crop',
     category: 'Gaming',
+    tags: ['Best Seller'],
+    specifications: {
+        'CPU': 'Intel Core i9-13900K',
+        'GPU': 'NVIDIA GeForce RTX 4090',
+        'RAM': '64GB DDR5 6000MHz',
+        'Storage': '4TB NVMe SSD',
+        'Case': 'Custom liquid-cooled chassis',
+    },
+    reviews: [
+        { id: 1, author: 'MaxSettings', rating: 5, comment: 'This thing is an absolute beast. Runs every game I throw at it on max settings without breaking a sweat.' },
+        { id: 2, author: 'VR_Enthusiast', rating: 5, comment: 'Incredible performance for VR. Super smooth and immersive. Worth every penny.' },
+    ],
     story: {
         title: "Enter a New Reality",
         narrative: "Beyond the screen lies a universe of infinite possibilities. The Titan Gaming PC is your vessel, a marvel of engineering built to shatter boundaries and redefine immersion. Experience games not as a player, but as a hero living in a world of breathtaking detail and lightning-fast response.",
@@ -111,14 +191,60 @@ const youthfulProducts: Product[] = [
         price: 129.99, 
         imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ab?q=80&w=800&auto=format&fit=crop',
         category: 'Footwear',
+        tags: ['Best Seller'],
+        specifications: {
+            'Upper Material': 'Knit Mesh and Synthetic Overlays',
+            'Sole': 'Chunky Rubber Outsole',
+            'Closure': 'Lace-up',
+            'Style': '90s Retro-Futurism',
+        },
+        reviews: [
+            { id: 1, author: 'StyleIcon', rating: 5, comment: 'So comfy and they look amazing. I get compliments everywhere I go!' },
+            { id: 2, author: 'EverydayJoe', rating: 5, comment: 'My new favorite daily shoes. Great for walking around the city.' },
+        ],
         story: {
             title: "Walk Your Own Path",
             narrative: "The city is your playground, every street a new adventure. The Vibe Sneakers are more than just footwear; they're a statement. Laced with the energy of the streets and designed for those who dare to be different, they carry you from spontaneous late-night hangouts to sun-drenched festival fields. Where will they take you next?",
             imageUrl: "https://images.unsplash.com/photo-1528701800487-ba01743862a9?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 10, name: 'Neon Beats Headphones', description: 'Wireless headphones with vibrant LED accents and deep bass.', price: 199.00, imageUrl: 'https://images.unsplash.com/photo-1545127398-14699f92334b?q=80&w=800&auto=format&fit=crop', category: 'Accessories' },
-    { id: 11, name: 'Pixel Art Display', description: 'A programmable LED display for your desk to show off your pixel art.', price: 249.50, imageUrl: 'https://images.unsplash.com/photo-1604502528143-7a6c533446b3?q=80&w=800&auto=format&fit=crop', category: 'Gear' },
+    { 
+        id: 10, 
+        name: 'Neon Beats Headphones', 
+        description: 'Wireless headphones with vibrant LED accents and deep bass.', 
+        price: 199.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1545127398-14699f92334b?q=80&w=800&auto=format&fit=crop', 
+        category: 'Accessories',
+        specifications: {
+            'Type': 'On-ear',
+            'Connectivity': 'Bluetooth 5.0',
+            'Features': 'Customizable LED lights, Enhanced Bass Mode',
+            'Battery Life': 'Up to 25 hours',
+        },
+        reviews: [
+            { id: 1, author: 'DJ_Vibes', rating: 5, comment: 'The bass is insane and the lights sync up with my music. Perfect for parties.' },
+            { id: 2, author: 'Tina', rating: 4, comment: 'They sound great and are really fun, but a bit flashy for the office.' },
+        ],
+    },
+    { 
+        id: 11, 
+        name: 'Pixel Art Display', 
+        description: 'A programmable LED display for your desk to show off your pixel art.', 
+        price: 249.50, 
+        imageUrl: 'https://images.unsplash.com/photo-1604502528143-7a6c533446b3?q=80&w=800&auto=format&fit=crop', 
+        category: 'Gear',
+        tags: ['New'],
+        specifications: {
+            'Resolution': '64x64 Pixels',
+            'Display Size': '10 inches',
+            'Connectivity': 'Wi-Fi, Bluetooth',
+            'Features': 'Mobile App for creation, Social Notifications',
+        },
+        reviews: [
+            { id: 1, author: 'PixelPete', rating: 5, comment: 'I love this thing! So much fun to create animations and show them off on my stream.' },
+            { id: 2, author: 'GeekChic', rating: 5, comment: 'A perfect piece of decor for my geeky office. The app is easy to use.' },
+        ],
+    },
     { 
         id: 12, 
         name: 'Kickflip Pro Skateboard', 
@@ -126,6 +252,16 @@ const youthfulProducts: Product[] = [
         price: 89.99, 
         imageUrl: 'https://images.unsplash.com/photo-1547466838-8d43d3a53c8c?q=80&w=800&auto=format&fit=crop',
         category: 'Gear',
+        specifications: {
+            'Deck Material': '7-ply Canadian Maple',
+            'Size': '8.25" x 32"',
+            'Trucks': 'Lightweight Aluminum',
+            'Wheels': '54mm 99A Urethane',
+        },
+        reviews: [
+            { id: 1, author: 'Skaterboi', rating: 5, comment: 'Great pop and super durable deck. The bearings are smooth right out of the box.' },
+            { id: 2, author: 'Newbie', rating: 4, comment: 'Awesome first board! The graphic is sick.' },
+        ],
         story: {
             title: "Define Your Ride",
             narrative: "Feel the grip, hear the roll, and own the pavement. The Kickflip Pro isn't just a board; it's an extension of you. Built for the park, the street, and everywhere in between, it’s your trusted companion for landing that trick you've been practicing for weeks. It’s freedom on four wheels.",
@@ -133,10 +269,78 @@ const youthfulProducts: Product[] = [
             videoUrl: "https://videos.pexels.com/video-files/5192224/5192224-hd_1920_1080_25fps.mp4"
         }
     },
-    { id: 13, name: 'Creator Ring Light', description: 'Get perfect lighting for your streams and videos with this versatile ring light.', price: 79.00, imageUrl: 'https://images.unsplash.com/photo-1604335293424-73d756c12808?q=80&w=800&auto=format&fit=crop', category: 'Gear' },
-    { id: 14, name: 'Graffiti Art Hoodie', description: 'A comfortable oversized hoodie featuring unique street art designs.', price: 69.99, imageUrl: 'https://images.unsplash.com/photo-1556819842-15a3a0e1a1b3?q=80&w=800&auto=format&fit=crop', category: 'Apparel' },
-    { id: 15, name: 'RGB Gaming Mouse', description: 'A high-precision gaming mouse with customizable RGB lighting.', price: 59.00, imageUrl: 'https://images.unsplash.com/photo-1600981335960-a2420938a16c?q=80&w=800&auto=format&fit=crop', category: 'Accessories' },
-    { id: 16, name: 'Synthwave Desk Mat', description: 'A large desk mat with a cool, retro synthwave design.', price: 39.00, imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop', category: 'Accessories' },
+    { 
+        id: 13, 
+        name: 'Creator Ring Light', 
+        description: 'Get perfect lighting for your streams and videos with this versatile ring light.', 
+        price: 79.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1604335293424-73d756c12808?q=80&w=800&auto=format&fit=crop', 
+        category: 'Gear',
+        specifications: {
+            'Size': '18-inch Diameter',
+            'Color Temperature': '3200K - 5600K Adjustable',
+            'Brightness Levels': '10',
+            'Power Source': 'AC Adapter',
+        },
+        reviews: [
+            { id: 1, author: 'InstaFamous', rating: 5, comment: 'A must-have for any content creator. My photos and videos look so much better.' },
+            { id: 2, author: 'TikTokStar', rating: 5, comment: 'The adjustable color and brightness are perfect. Easy to set up.' },
+        ],
+    },
+    { 
+        id: 14, 
+        name: 'Graffiti Art Hoodie', 
+        description: 'A comfortable oversized hoodie featuring unique street art designs.', 
+        price: 69.99, 
+        imageUrl: 'https://images.unsplash.com/photo-1556819842-15a3a0e1a1b3?q=80&w=800&auto=format&fit=crop', 
+        category: 'Apparel',
+        specifications: {
+            'Material': '80% Cotton, 20% Polyester Fleece',
+            'Fit': 'Oversized, Drop Shoulder',
+            'Care': 'Machine wash cold, tumble dry low',
+            'Features': 'Kangaroo Pocket, Printed Sleeves',
+        },
+        reviews: [
+            { id: 1, author: 'UrbanExplorer', rating: 5, comment: 'Super comfy and the design is fire. I live in this hoodie now.' },
+            { id: 2, author: 'Jess', rating: 5, comment: 'Great quality material, feels really soft.' },
+        ],
+    },
+    { 
+        id: 15, 
+        name: 'RGB Gaming Mouse', 
+        description: 'A high-precision gaming mouse with customizable RGB lighting.', 
+        price: 59.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1600981335960-a2420938a16c?q=80&w=800&auto=format&fit=crop', 
+        category: 'Accessories',
+        specifications: {
+            'DPI': 'Up to 12,000',
+            'Sensor': 'PixArt Optical Sensor',
+            'Buttons': '6 programmable',
+            'Lighting': '16.8 million color RGB',
+        },
+        reviews: [
+            { id: 1, author: 'FPS_King', rating: 5, comment: 'Lightweight and super accurate. The RGB effects are really cool too.' },
+            { id: 2, author: 'CasualGamer', rating: 4, comment: 'Awesome mouse for the price. The software is easy to use.' },
+        ],
+    },
+    { 
+        id: 16, 
+        name: 'Synthwave Desk Mat', 
+        description: 'A large desk mat with a cool, retro synthwave design.', 
+        price: 39.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop', 
+        category: 'Accessories',
+        specifications: {
+            'Dimensions': '900mm x 400mm x 4mm',
+            'Material': 'Micro-woven Cloth Surface',
+            'Surface': 'Optimized for all mouse sensors',
+            'Edge': 'Stitched Edges',
+        },
+        reviews: [
+            { id: 1, author: 'RetroWaveFan', rating: 5, comment: 'The perfect vibe for my setup. It\'s huge and my mouse glides on it.' },
+            { id: 2, author: 'WFH_Pro', rating: 5, comment: 'Adds a nice pop of color to my home office and protects my desk.' },
+        ],
+    },
 ];
 
 const fashionProducts: Product[] = [
@@ -147,14 +351,60 @@ const fashionProducts: Product[] = [
         price: 1250.00, 
         imageUrl: 'https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?q=80&w=800&auto=format&fit=crop',
         category: 'Accessories',
+        tags: ['Best Seller'],
+        specifications: {
+            'Case Material': '316L Stainless Steel',
+            'Movement': 'Swiss Automatic (ETA 2824-2)',
+            'Crystal': 'Sapphire Crystal',
+            'Water Resistance': '100 meters / 10 ATM',
+            'Strap': 'Genuine Alligator Leather',
+        },
+        reviews: [
+            { id: 1, author: 'Connoisseur', rating: 5, comment: 'Exquisite craftsmanship. The sweeping second hand is mesmerizing. A true heirloom piece.' },
+            { id: 2, author: 'CEO', rating: 5, comment: 'The perfect dress watch. Understated, elegant, and radiates quality.' },
+        ],
         story: {
             title: "A Legacy on Your Wrist",
             narrative: "Time is the ultimate luxury. The Chrono-Elegance isn't just about telling time; it's about owning it. Each tick is a reminder of moments lived and memories made. Forged with precision and designed with soul, it's a testament to timeless style that transcends fleeting trends. It's not just a watch; it's your story.",
             imageUrl: "https://images.unsplash.com/photo-1620625515032-6ed2a1438834?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 18, name: 'The Voyager Leather Bag', description: 'A handcrafted leather satchel perfect for the modern professional.', price: 450.00, imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800&auto=format&fit=crop', category: 'Bags' },
-    { id: 19, name: 'Silk Scarf "Monarch"', description: 'An elegant silk scarf with a vibrant, artistic butterfly print.', price: 120.00, imageUrl: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800&auto=format&fit=crop', category: 'Accessories' },
+    { 
+        id: 18, 
+        name: 'The Voyager Leather Bag', 
+        description: 'A handcrafted leather satchel perfect for the modern professional.', 
+        price: 450.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800&auto=format&fit=crop', 
+        category: 'Bags',
+        specifications: {
+            'Material': 'Full-Grain Italian Leather',
+            'Dimensions': '15" x 11" x 4"',
+            'Compartments': 'Padded laptop sleeve (fits 15" laptop), 2 interior pockets',
+            'Strap': 'Adjustable and detachable shoulder strap',
+        },
+        reviews: [
+            { id: 1, author: 'Lawyer', rating: 5, comment: 'The leather is beautiful and has aged wonderfully. I get so many compliments.' },
+            { id: 2, author: 'Consultant', rating: 5, comment: 'Spacious enough for all my essentials, but still looks sleek and professional.' },
+        ],
+    },
+    { 
+        id: 19, 
+        name: 'Silk Scarf "Monarch"', 
+        description: 'An elegant silk scarf with a vibrant, artistic butterfly print.', 
+        price: 120.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800&auto=format&fit=crop', 
+        category: 'Accessories',
+        specifications: {
+            'Material': '100% Mulberry Silk',
+            'Dimensions': '35" x 35" (90cm x 90cm)',
+            'Care': 'Dry clean only',
+            'Weave': 'Twill',
+        },
+        reviews: [
+            { id: 1, author: 'ArtLover', rating: 5, comment: 'The colors are even more vibrant in person. A true work of art.' },
+            { id: 2, author: 'GiftGiver', rating: 5, comment: 'Bought this as a gift for my wife and she adores it. The quality is exceptional.' },
+        ],
+    },
     { 
         id: 20, 
         name: 'Trench Coat "London Fog"', 
@@ -162,6 +412,7 @@ const fashionProducts: Product[] = [
         price: 380.00, 
         imageUrl: 'https://images.unsplash.com/photo-1517942491322-1c6ada40a2c0?q=80&w=800&auto=format&fit=crop',
         category: 'Apparel',
+        tags: ['New'],
         videoUrl: "https://videos.pexels.com/video-files/8053350/8053350-hd_1920_1080_25fps.mp4",
         specifications: {
             'Material': '100% Cotton Gabardine',
@@ -180,10 +431,78 @@ const fashionProducts: Product[] = [
             imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop"
         }
     },
-    { id: 21, name: 'Velvet Evening Gown', description: 'A stunning, floor-length velvet gown for special occasions.', price: 600.00, imageUrl: 'https://images.unsplash.com/photo-1595509553306-932f91b6c771?q=80&w=800&auto=format&fit=crop', category: 'Apparel' },
-    { id: 22, name: 'Suede Ankle Boots', description: 'Stylish and comfortable suede boots that complement any outfit.', price: 180.00, imageUrl: 'https://images.unsplash.com/photo-1519758369395-97995f54032b?q=80&w=800&auto=format&fit=crop', category: 'Footwear' },
-    { id: 23, name: 'Designer Sunglasses', description: 'Protect your eyes in style with these chic, oversized sunglasses.', price: 250.00, imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&auto=format&fit=crop', category: 'Accessories' },
-    { id: 24, name: 'Cashmere Sweater', description: 'Experience ultimate comfort and luxury with this 100% cashmere sweater.', price: 300.00, imageUrl: 'https://images.unsplash.com/photo-1620799140159-48301732642a?q=80&w=800&auto=format&fit=crop', category: 'Apparel' },
+    { 
+        id: 21, 
+        name: 'Velvet Evening Gown', 
+        description: 'A stunning, floor-length velvet gown for special occasions.', 
+        price: 600.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1595509553306-932f91b6c771?q=80&w=800&auto=format&fit=crop', 
+        category: 'Apparel',
+        specifications: {
+            'Fabric': 'Stretch Velvet',
+            'Fit': 'Mermaid Silhouette',
+            'Length': 'Floor-length',
+            'Care': 'Dry clean only',
+        },
+        reviews: [
+            { id: 1, author: 'GalaGoer', rating: 5, comment: 'Felt like a movie star in this dress. It fits like a glove and the material is so luxurious.' },
+            { id: 2, author: 'Bella', rating: 5, comment: 'I wore this to a wedding and received so many compliments. It\'s absolutely timeless.' },
+        ],
+    },
+    { 
+        id: 22, 
+        name: 'Suede Ankle Boots', 
+        description: 'Stylish and comfortable suede boots that complement any outfit.', 
+        price: 180.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1519758369395-97995f54032b?q=80&w=800&auto=format&fit=crop', 
+        category: 'Footwear',
+        specifications: {
+            'Upper Material': 'Genuine Suede',
+            'Heel Height': '2.5 inches (6.5cm)',
+            'Sole': 'Rubber',
+            'Closure': 'Side Zipper',
+        },
+        reviews: [
+            { id: 1, author: 'Fashionista', rating: 5, comment: 'The perfect everyday boot. They are comfortable enough to walk in all day but still look chic.' },
+            { id: 2, author: 'AutumnLover', rating: 5, comment: 'I love the rich color. They go with everything from jeans to dresses.' },
+        ],
+    },
+    { 
+        id: 23, 
+        name: 'Designer Sunglasses', 
+        description: 'Protect your eyes in style with these chic, oversized sunglasses.', 
+        price: 250.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&auto=format&fit=crop', 
+        category: 'Accessories',
+        specifications: {
+            'Frame Material': 'Acetate',
+            'Lens': 'Polarized, Gradient',
+            'UV Protection': '100% UVA/UVB',
+            'Size': '58-18-145',
+        },
+        reviews: [
+            { id: 1, author: 'Sunny', rating: 5, comment: 'So glamorous! The quality is amazing and they feel very sturdy.' },
+            { id: 2, author: 'Traveler', rating: 5, comment: 'Great for cutting down glare. I take them with me everywhere.' },
+        ],
+    },
+    { 
+        id: 24, 
+        name: 'Cashmere Sweater', 
+        description: 'Experience ultimate comfort and luxury with this 100% cashmere sweater.', 
+        price: 300.00, 
+        imageUrl: 'https://images.unsplash.com/photo-1620799140159-48301732642a?q=80&w=800&auto=format&fit=crop', 
+        category: 'Apparel',
+        specifications: {
+            'Material': '100% Grade-A Cashmere',
+            'Knit': '2-ply',
+            'Fit': 'Classic Crewneck',
+            'Care': 'Hand wash or dry clean',
+        },
+        reviews: [
+            { id: 1, author: 'LuxuryLover', rating: 5, comment: 'Incredibly soft and warm without being bulky. An investment piece that I\'ll have for years.' },
+            { id: 2, author: 'Minimalist', rating: 5, comment: 'The perfect sweater. Simple, elegant, and goes with everything.' },
+        ],
+    },
 ];
 
 
@@ -193,6 +512,7 @@ export const themes: Record<Theme, AppTheme> = {
     styles: {
       '--font-family': "'Poppins', sans-serif",
       '--background-primary': '#111827',
+      '--background-primary-translucent': 'rgba(17, 24, 39, 0.6)',
       '--background-secondary': '#1f2937',
       '--background-secondary-translucent': 'rgba(31, 41, 55, 0.5)',
       '--background-tertiary': '#374151',
@@ -217,6 +537,7 @@ export const themes: Record<Theme, AppTheme> = {
     styles: {
         '--font-family': "'Poppins', sans-serif",
         '--background-primary': '#1a1a2e',
+        '--background-primary-translucent': 'rgba(26, 26, 46, 0.6)',
         '--background-secondary': '#16213e',
         '--background-secondary-translucent': 'rgba(22, 33, 62, 0.6)',
         '--background-tertiary': '#0f3460',
@@ -241,6 +562,7 @@ export const themes: Record<Theme, AppTheme> = {
     styles: {
       '--font-family': "'Playfair Display', serif",
       '--background-primary': '#2d2d2d',
+      '--background-primary-translucent': 'rgba(45, 45, 45, 0.6)',
       '--background-secondary': '#3c3c3c',
       '--background-secondary-translucent': 'rgba(60, 60, 60, 0.5)',
       '--background-tertiary': '#4a4a4a',

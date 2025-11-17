@@ -15,12 +15,17 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
         <div className="flipper relative w-full h-full transform-style-3d transition-transform duration-700">
             {/* Front of card */}
             <div className="absolute w-full h-full backface-hidden rounded-[var(--border-radius)] overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300 bg-[var(--background-secondary)] flex flex-col">
-                <motion.img 
-                    src={product.imageUrl} 
-                    alt={product.name} 
-                    className="w-full h-48 object-cover" 
-                    layoutId={`product-image-${product.id}`}
-                />
+                <div className="relative shine-effect">
+                    <motion.img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="w-full h-48 object-cover" 
+                        layoutId={`product-image-${product.id}`}
+                    />
+                    {product.tags && product.tags.length > 0 && (
+                        <span className="product-badge">{product.tags[0]}</span>
+                    )}
+                </div>
                 <div className="p-4 flex flex-col flex-grow justify-between">
                     <h3 className="text-xl font-bold text-[var(--text-primary)]">{product.name}</h3>
                     <p className="text-2xl font-bold text-[var(--primary-accent)] self-end tabular-nums">${product.price.toFixed(2)}</p>
@@ -32,17 +37,18 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
                 <p className="text-[var(--text-secondary)] flex-grow">{product.description}</p>
                  <div className="mt-4 flex justify-between items-center w-full">
                     <p className="text-2xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
-                    <button 
+                    <motion.button 
+                        whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           onAddToCart(product);
                         }}
-                        className="btn-3d flex items-center gap-2 px-4 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all duration-200"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all duration-200"
                         aria-label={`Add ${product.name} to cart`}
                         >
                         <CartIcon className="w-5 h-5" />
                         Add to Cart
-                    </button>
+                    </motion.button>
                  </div>
             </div>
         </div>

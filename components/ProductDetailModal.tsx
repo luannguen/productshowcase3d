@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '../types';
 import BaseModal from './BaseModal';
-import { CartIcon, StarIcon, CheckIcon, GridIcon } from './icons';
+import { CartIcon, StarIcon, CheckIcon } from './icons';
 
 interface ProductDetailModalProps {
   isOpen: boolean;
@@ -119,7 +119,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product
     <BaseModal isOpen={isOpen} onClose={onClose} title="">
       <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         <div className="w-full flex flex-col gap-3">
-             <div className="w-full aspect-square bg-[var(--background-tertiary)] rounded-[var(--border-radius)] overflow-hidden flex items-center justify-center">
+             <div className="w-full aspect-square bg-[var(--background-tertiary)] rounded-[var(--border-radius)] overflow-hidden flex items-center justify-center shine-effect">
                 <AnimatePresence mode="wait">
                   <motion.div key={activeMedia} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
                     {activeMedia === 'image' ? (
@@ -155,7 +155,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, product
           initial="hidden"
           animate="visible"
         >
-          <motion.h2 variants={childVariants} className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-family)' }}>
+          <motion.h2 variants={childVariants} className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] text-transparent bg-clip-text" style={{ fontFamily: 'var(--font-family)' }}>
             {product.name}
           </motion.h2>
 
