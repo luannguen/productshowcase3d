@@ -20,13 +20,23 @@ type Action = {
   perform: () => void;
 };
 
+const viewIcons: Record<ViewMode, React.FC<{ className?: string }>> = {
+    [ViewMode.Grid]: Icons.GridIcon,
+    [ViewMode.List]: Icons.ListIcon,
+    [ViewMode.Table]: Icons.TableIcon,
+    [ViewMode.Flip]: Icons.FlipIcon,
+    [ViewMode.Carousel]: Icons.CarouselIcon,
+    [ViewMode.ThreeD]: Icons.ThreeDIcon,
+    [ViewMode.Story]: Icons.StoryIcon,
+};
+
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setView, setTheme }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const actions: Action[] = [
     ...Object.values(ViewMode).map(view => ({
-      id: `view-${view}`, name: `Change view to ${view}`, section: 'Views', icon: React.createElement(Icons[view.replace('3D ', 'ThreeD').replace(' ', '') + 'Icon'], {className: 'w-5 h-5'}),
+      id: `view-${view}`, name: `Change view to ${view}`, section: 'Views', icon: React.createElement(viewIcons[view], {className: 'w-5 h-5'}),
       perform: () => setView(view),
     })),
     ...Object.values(Theme).map(theme => ({
@@ -50,6 +60,14 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setVie
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isOpen) return;
+
+    if (e.key === 'Escape') {
+      onClose();
+      return;
+    }
+    
+    if (filteredActions.length === 0) return;
+
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex(i => (i + 1) % filteredActions.length);
@@ -59,8 +77,6 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setVie
     } else if (e.key === 'Enter') {
       e.preventDefault();
       filteredActions[selectedIndex]?.perform();
-      onClose();
-    } else if (e.key === 'Escape') {
       onClose();
     }
   }, [isOpen, filteredActions, selectedIndex, onClose]);

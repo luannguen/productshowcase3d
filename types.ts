@@ -4,10 +4,20 @@ export interface Product {
   description: string;
   price: number;
   imageUrl: string;
+  category: string;
+  videoUrl?: string;
+  specifications?: Record<string, string>;
+  reviews?: {
+    id: number;
+    author: string;
+    rating: number;
+    comment: string;
+  }[];
   story?: {
     title: string;
     narrative: string;
     imageUrl: string;
+    videoUrl?: string;
   };
 }
 
@@ -36,3 +46,5 @@ export enum Theme {
     Electronics = 'Electronics',
     Fashion = 'Fashion',
 }
+
+export type SortOption = 'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc';

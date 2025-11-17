@@ -7,9 +7,26 @@ interface ListViewProps {
   products: Product[];
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  searchQuery: string;
 }
 
-const ListItem: React.FC<{ product: Product, onProductClick: (product: Product) => void, onAddToCart: (product: Product) => void }> = ({ product, onProductClick, onAddToCart }) => {
+const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+        <>
+            {parts.map((part, i) =>
+                part.toLowerCase() === query.toLowerCase() ? (
+                    <mark key={i}>{part}</mark>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
+const ListItem: React.FC<{ product: Product, onProductClick: (product: Product) => void, onAddToCart: (product: Product) => void, searchQuery: string }> = ({ product, onProductClick, onAddToCart, searchQuery }) => {
     
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const { currentTarget: target } = e;
@@ -31,10 +48,15 @@ const ListItem: React.FC<{ product: Product, onProductClick: (product: Product) 
             alt={product.name} 
             className="w-full sm:w-48 h-48 sm:h-32 object-cover rounded-md flex-shrink-0"
             layoutId={`product-image-${product.id}`}
+            loading="lazy"
           />
           <div className="sm:ml-6 mt-4 sm:mt-0 flex-1 z-10">
-            <h3 className="text-2xl font-bold text-[var(--text-primary)]">{product.name}</h3>
-            <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">{product.description}</p>
+            <h3 className="text-2xl font-bold text-[var(--text-primary)]">
+                {highlightMatch(product.name, searchQuery)}
+            </h3>
+            <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">
+                {highlightMatch(product.description, searchQuery)}
+            </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-right flex-shrink-0 z-10">
             <p className="text-3xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
@@ -54,18 +76,26 @@ const ListItem: React.FC<{ product: Product, onProductClick: (product: Product) 
     );
 };
 
-const ListView: React.FC<ListViewProps> = ({ products, onProductClick, onAddToCart }) => {
+const ListView: React.FC<ListViewProps> = ({ products, onProductClick, onAddToCart, searchQuery }) => {
   return (
-    <div className="space-y-4">
-      {products.map((product) => (
-        <ListItem 
-          key={product.id} 
-          product={product}
-          onProductClick={onProductClick}
-          onAddToCart={onAddToCart}
-        />
-      ))}
-    </div>
+    <>
+      <div className="mb-4">
+        <p className="text-sm text-[var(--text-secondary)]">
+          Displaying <span className="font-bold text-[var(--text-primary)]">{products.length}</span> product{products.length !== 1 ? 's' : ''}.
+        </p>
+      </div>
+      <div className="space-y-4">
+        {products.map((product) => (
+          <ListItem 
+            key={product.id} 
+            product={product}
+            onProductClick={onProductClick}
+            onAddToCart={onAddToCart}
+            searchQuery={searchQuery}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 

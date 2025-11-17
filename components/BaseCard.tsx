@@ -59,6 +59,7 @@ const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id }) => {
         rotateX,
         rotateY,
       }}
+      whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       className="cursor-pointer"
     >

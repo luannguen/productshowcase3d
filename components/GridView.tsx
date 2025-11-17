@@ -8,18 +8,38 @@ interface GridViewProps {
   products: Product[];
   onProductClick: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  searchQuery: string;
 }
 
-const ProductCardContent: React.FC<{ product: Product, onAddToCart: (product: Product) => void; }> = ({ product, onAddToCart }) => (
+const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+        <>
+            {parts.map((part, i) =>
+                part.toLowerCase() === query.toLowerCase() ? (
+                    <mark key={i}>{part}</mark>
+                ) : (
+                    part
+                )
+            )}
+        </>
+    );
+};
+
+const ProductCardContent: React.FC<{ product: Product; onAddToCart: (product: Product) => void; searchQuery: string }> = ({ product, onAddToCart, searchQuery }) => (
   <>
     <motion.img 
         src={product.imageUrl} 
         alt={product.name} 
         className="w-full h-48 object-cover"
         layoutId={`product-image-${product.id}`}
+        loading="lazy"
     />
     <div className="p-4 flex flex-col flex-grow">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] flex-grow">{product.name}</h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] flex-grow">
+        {highlightMatch(product.name, searchQuery)}
+      </h3>
       <div className="mt-4 flex justify-between items-center">
         <p className="text-2xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
         <button 
@@ -47,22 +67,29 @@ const containerVariants = {
   },
 };
 
-const GridView: React.FC<GridViewProps> = ({ products, onProductClick, onAddToCart }) => {
+const GridView: React.FC<GridViewProps> = ({ products, onProductClick, onAddToCart, searchQuery }) => {
   return (
-    <motion.div 
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {products.map((product) => (
-        <BaseCard key={product.id} onClick={() => onProductClick(product)}>
-          <div className="gradient-border-hover bg-[var(--background-secondary)] rounded-[var(--border-radius)] overflow-hidden shadow-lg flex flex-col h-full">
-            <ProductCardContent product={product} onAddToCart={onAddToCart} />
-          </div>
-        </BaseCard>
-      ))}
-    </motion.div>
+    <>
+      <div className="mb-4">
+        <p className="text-sm text-[var(--text-secondary)]">
+          Displaying <span className="font-bold text-[var(--text-primary)]">{products.length}</span> product{products.length !== 1 ? 's' : ''}.
+        </p>
+      </div>
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {products.map((product) => (
+          <BaseCard key={product.id} onClick={() => onProductClick(product)}>
+            <div className="gradient-border-hover bg-[var(--background-secondary)] rounded-[var(--border-radius)] overflow-hidden shadow-lg flex flex-col h-full">
+              <ProductCardContent product={product} onAddToCart={onAddToCart} searchQuery={searchQuery} />
+            </div>
+          </BaseCard>
+        ))}
+      </motion.div>
+    </>
   );
 };
 

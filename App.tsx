@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Product, ViewMode, Theme, CartItem, ToastMessage } from './types';
+import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption } from './types';
 import { themes } from './constants';
 import ViewSwitcher from './components/ViewSwitcher';
 import GridView from './components/GridView';
@@ -23,6 +23,7 @@ import ToastContainer from './components/Toast';
 import CommandPalette from './components/CommandPalette';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import Tooltip from './components/Tooltip';
+import AccessibilityAnnouncer from './components/AccessibilityAnnouncer';
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -43,6 +44,11 @@ const App: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [announcerMessage, setAnnouncerMessage] = useState('');
+
+  // New state for filters
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<SortOption>('default');
 
   const currentThemeData = appThemes[activeTheme];
   const PRODUCTS = currentThemeData.products;
@@ -109,13 +115,23 @@ const App: React.FC = () => {
   
   const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice });
 
+  // Reset filters on theme change
   useEffect(() => {
     setPriceRange({ min: 0, max: maxPrice });
     setSearchQuery('');
+    setSelectedCategories([]);
+    setSortOption('default');
   }, [activeTheme, maxPrice]);
+  
+  const allCategories = useMemo(() => 
+    [...new Set(PRODUCTS.map(p => p.category))].sort()
+  , [PRODUCTS]);
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(product => {
+    let processedProducts = [...PRODUCTS];
+
+    // 1. Filter
+    processedProducts = processedProducts.filter(product => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         product.name.toLowerCase().includes(searchLower) ||
@@ -124,9 +140,42 @@ const App: React.FC = () => {
       const matchesPrice =
         product.price >= priceRange.min && product.price <= priceRange.max;
         
-      return matchesSearch && matchesPrice;
+      const matchesCategory =
+        selectedCategories.length === 0 || selectedCategories.includes(product.category);
+
+      return matchesSearch && matchesPrice && matchesCategory;
     });
-  }, [PRODUCTS, searchQuery, priceRange]);
+
+    // 2. Sort
+    switch (sortOption) {
+        case 'name-asc':
+            processedProducts.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'name-desc':
+            processedProducts.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+        case 'price-asc':
+            processedProducts.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-desc':
+            processedProducts.sort((a, b) => b.price - a.price);
+            break;
+        default:
+            // No sort or sort by ID
+            break;
+    }
+
+    return processedProducts;
+  }, [PRODUCTS, searchQuery, priceRange, selectedCategories, sortOption]);
+
+  // Accessibility Announcer Effect
+  useEffect(() => {
+    if (filteredProducts.length > 0) {
+        setAnnouncerMessage(`Showing ${filteredProducts.length} products.`);
+    } else {
+        setAnnouncerMessage('No products found.');
+    }
+  }, [filteredProducts]);
   
   const handleSetView = useCallback((newView: ViewMode) => {
     if (newView !== viewMode) {
@@ -228,24 +277,27 @@ const App: React.FC = () => {
           </div>
         );
     }
-    const props = { products: filteredProducts, onProductClick: handleProductClick, onAddToCart: handleAddToCart };
+    const baseProps = { products: filteredProducts, onProductClick: handleProductClick, onAddToCart: handleAddToCart };
+    const viewPropsWithSearch = { ...baseProps, searchQuery };
+
     switch (viewMode) {
-      case ViewMode.Grid: return <GridView {...props} />;
-      case ViewMode.List: return <ListView {...props} />;
+      case ViewMode.Grid: return <GridView {...viewPropsWithSearch} />;
+      case ViewMode.List: return <ListView {...viewPropsWithSearch} />;
       case ViewMode.Table: return <TableView products={filteredProducts} onProductClick={handleProductClick} />;
-      case ViewMode.Flip: return <FlipView {...props} />;
-      case ViewMode.Carousel: return <CarouselView {...props} />;
-      case ViewMode.ThreeD: return <ThreeDView />;
-      case ViewMode.Story: return <StoryView products={filteredProducts.filter(p => p.story)} onAddToCart={handleAddToCart} />;
-      default: return <GridView {...props} />;
+      case ViewMode.Flip: return <FlipView {...baseProps} />;
+      case ViewMode.Carousel: return <CarouselView {...baseProps} />;
+      case ViewMode.ThreeD: return <ThreeDView themeStyles={currentThemeData.styles} />;
+      case ViewMode.Story: return <StoryView products={filteredProducts.filter(p => p.story)} onAddToCart={handleAddToCart} onProductClick={handleProductClick} />;
+      default: return <GridView {...viewPropsWithSearch} />;
     }
   };
 
   return (
     <div 
         style={currentThemeData.styles}
-        className={`min-h-screen bg-[var(--background-primary)] text-[var(--text-primary)] font-sans transition-colors duration-500`}
+        className={`min-h-screen bg-transparent text-[var(--text-primary)] font-sans transition-colors duration-500`}
     >
+      <AccessibilityAnnouncer message={announcerMessage} />
       <div className={`${isModalOpen ? 'modal-open-blur' : ''}`}>
         <header className="glass-header sticky top-0 z-20 shadow-lg border-b border-white/10">
           <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
@@ -259,6 +311,11 @@ const App: React.FC = () => {
                     priceRange={priceRange}
                     setPriceRange={setPriceRange}
                     maxPrice={maxPrice}
+                    categories={allCategories}
+                    selectedCategories={selectedCategories}
+                    setSelectedCategories={setSelectedCategories}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
                 />
             </div>
 

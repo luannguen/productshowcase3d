@@ -7,11 +7,12 @@ import { CartIcon } from './icons';
 interface StoryViewProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
+  onProductClick: (product: Product) => void;
 }
 
 const STORY_DURATION = 8000; // 8 seconds per story
 
-const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
+const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductClick }) => {
     // FIX: Replace useAnimation with useMotionValue and a ref for animation controls.
     const [activeIndex, setActiveIndex] = useState(0);
     const width = useMotionValue("0%");
@@ -121,7 +122,19 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
                     onDragEnd={handleDragEnd}
                 >
                     <div className="absolute inset-0 z-0">
-                        <img src={activeProduct.story?.imageUrl} alt={`${activeProduct.name} story background`} className="w-full h-full object-cover animate-kenburns" />
+                        {activeProduct.story?.videoUrl ? (
+                            <video
+                                key={activeProduct.story.videoUrl}
+                                src={activeProduct.story.videoUrl}
+                                className="w-full h-full object-cover"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                            />
+                        ) : (
+                            <img src={activeProduct.story?.imageUrl} alt={`${activeProduct.name} story background`} className="w-full h-full object-cover animate-kenburns" />
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--background-secondary)] via-[var(--background-secondary)]/70 to-transparent"></div>
                     </div>
 
@@ -144,7 +157,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
                             <motion.p className="mt-4 text-lg text-[var(--text-secondary)] max-w-prose mx-auto md:mx-0" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.4 } }}>
                                 {activeProduct.story?.narrative}
                             </motion.p>
-                            <motion.div className="mt-6 flex items-center justify-center md:justify-start gap-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.6 } }}>
+                            <motion.div className="mt-6 flex items-center justify-center md:justify-start gap-4 flex-wrap" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.6 } }}>
                                 <p className="text-4xl font-extrabold text-[var(--primary-accent)] tabular-nums">
                                     ${activeProduct.price.toFixed(2)}
                                 </p>
@@ -155,6 +168,13 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart }) => {
                                 >
                                     <CartIcon className="w-6 h-6" />
                                     Add to Cart
+                                </button>
+                                <button
+                                    onClick={() => onProductClick(activeProduct)}
+                                    className="px-6 py-3 border-2 border-[var(--primary-accent)] text-[var(--primary-accent)] font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent)] hover:text-white transition-colors duration-200 text-lg"
+                                    aria-label={`Learn more about ${activeProduct.name}`}
+                                >
+                                    Learn More
                                 </button>
                             </motion.div>
                         </div>

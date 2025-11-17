@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Theme } from '../types';
 import Tooltip from './Tooltip';
+import { ElectronicsIcon, FashionIcon, YouthfulIcon } from './icons';
 
 interface ThemeSwitcherProps {
   currentTheme: Theme;
@@ -9,19 +10,19 @@ interface ThemeSwitcherProps {
 }
 
 const themeOptions = [
-    { theme: Theme.Electronics, label: 'Electronics' },
-    { theme: Theme.Youthful, label: 'Youthful' },
-    { theme: Theme.Fashion, label: 'Fashion' },
+    { theme: Theme.Electronics, label: 'Electronics', Icon: ElectronicsIcon },
+    { theme: Theme.Youthful, label: 'Youthful', Icon: YouthfulIcon },
+    { theme: Theme.Fashion, label: 'Fashion', Icon: FashionIcon },
 ];
 
 const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ currentTheme, setTheme }) => {
   return (
     <div className="flex items-center bg-[var(--background-secondary)] rounded-[var(--border-radius)] p-1 space-x-1">
-      {themeOptions.map(({ theme, label }) => (
+      {themeOptions.map(({ theme, label, Icon }) => (
         <Tooltip key={theme} text={`Switch to ${label} Theme`}>
             <motion.button
             onClick={() => setTheme(theme)}
-            className={`relative px-3 py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--primary-accent)] ${
+            className={`relative flex items-center justify-center p-2 lg:px-3 lg:py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--primary-accent)] ${
                 currentTheme === theme
                 ? 'text-white'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--background-tertiary)] hover:text-[var(--text-primary)]'
@@ -37,7 +38,10 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ currentTheme, setTheme })
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 />
             )}
-            <span className="relative z-10">{label}</span>
+            <div className="relative z-10 flex items-center">
+                <Icon className="w-5 h-5 lg:mr-2" />
+                <span className="hidden lg:inline">{label}</span>
+            </div>
             </motion.button>
         </Tooltip>
       ))}

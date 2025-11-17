@@ -59,22 +59,22 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, on
                              <p className="text-[var(--text-secondary)]">Qty: {quantity}</p>
                         </div>
                     </div>
-                    <p className="text-[var(--text-primary)] font-medium">${(product.price * quantity).toFixed(2)}</p>
+                    <p className="text-[var(--text-primary)] font-medium tabular-nums">${(product.price * quantity).toFixed(2)}</p>
                 </div>
             ))}
         </div>
         <div className="space-y-2 text-sm border-t border-[var(--border-color)] pt-4">
             <div className="flex justify-between">
                 <span className="text-[var(--text-secondary)]">Subtotal ({totalItems} items)</span>
-                <span className="font-medium text-[var(--text-primary)]">${subtotal.toFixed(2)}</span>
+                <span className="font-medium text-[var(--text-primary)] tabular-nums">${subtotal.toFixed(2)}</span>
             </div>
              <div className="flex justify-between">
                 <span className="text-[var(--text-secondary)]">Shipping</span>
-                <span className="font-medium text-[var(--text-primary)]">${shippingCost.toFixed(2)}</span>
+                <span className="font-medium text-[var(--text-primary)] tabular-nums">${shippingCost.toFixed(2)}</span>
             </div>
              <div className="flex justify-between text-lg font-bold border-t-2 border-[var(--primary-accent)] pt-2 mt-2">
                 <span className="text-[var(--text-primary)]">Total</span>
-                <span className="text-[var(--primary-accent)]">${total.toFixed(2)}</span>
+                <span className="text-[var(--primary-accent)] tabular-nums">${total.toFixed(2)}</span>
             </div>
         </div>
       </div>
@@ -137,15 +137,15 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, on
         <div className="mt-6 p-4 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] w-full max-w-sm text-sm">
              <div className="flex justify-between mt-1">
                 <span className="text-[var(--text-secondary)]">Subtotal</span>
-                <span className="font-medium text-[var(--text-primary)]">${subtotal.toFixed(2)}</span>
+                <span className="font-medium text-[var(--text-primary)] tabular-nums">${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between mt-1">
                 <span className="text-[var(--text-secondary)]">Shipping</span>
-                <span className="font-medium text-[var(--text-primary)]">${shippingCost.toFixed(2)}</span>
+                <span className="font-medium text-[var(--text-primary)] tabular-nums">${shippingCost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between mt-2 pt-2 border-t border-[var(--border-color)] font-bold">
                 <span className="text-[var(--text-primary)]">Total Paid</span>
-                <span className="text-[var(--primary-accent)]">${total.toFixed(2)}</span>
+                <span className="text-[var(--primary-accent)] tabular-nums">${total.toFixed(2)}</span>
             </div>
         </div>
          <button onClick={onClose} className="mt-8 px-6 py-2 text-sm bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors">

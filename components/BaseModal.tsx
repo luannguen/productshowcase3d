@@ -92,7 +92,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, title 
             onClick={onClose}
             aria-hidden="true"
           />
-          <div className="fixed inset-0 z-50 flex items-center justify-center md:items-center md:justify-center p-0 md:p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:justify-center p-0 md:p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <motion.div
               ref={modalRef}
               className="bg-[var(--background-secondary)] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-t-[var(--border-radius)] md:rounded-[var(--border-radius)] shadow-2xl flex flex-col"
@@ -101,9 +101,9 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, title 
               animate="visible"
               exit="hidden"
               transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.3 }}
-              drag={!isMobile}
-              dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-              dragElastic={0.1}
+              drag={isMobile ? "y" : false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={handleDragEnd}
             >
               <header 

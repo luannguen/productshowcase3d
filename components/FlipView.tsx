@@ -14,7 +14,7 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
     <div className="group h-80 w-full perspective-1000">
         <div className="flipper relative w-full h-full transform-style-3d transition-transform duration-700">
             {/* Front of card */}
-            <div className="absolute w-full h-full backface-hidden rounded-[var(--border-radius)] overflow-hidden shadow-xl bg-[var(--background-secondary)] flex flex-col">
+            <div className="absolute w-full h-full backface-hidden rounded-[var(--border-radius)] overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300 bg-[var(--background-secondary)] flex flex-col">
                 <motion.img 
                     src={product.imageUrl} 
                     alt={product.name} 
@@ -27,7 +27,7 @@ const FlipCard: React.FC<{ product: Product; onAddToCart: (product: Product) => 
                 </div>
             </div>
             {/* Back of card */}
-            <div className="absolute w-full h-full backface-hidden rotate-y-180 rounded-[var(--border-radius)] overflow-hidden shadow-xl bg-[var(--background-tertiary)] p-6 flex flex-col justify-center items-center text-center">
+            <div className="absolute w-full h-full backface-hidden rotate-y-180 rounded-[var(--border-radius)] overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300 bg-[var(--background-tertiary)] p-6 flex flex-col justify-center items-center text-center">
                  <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">{product.name}</h3>
                 <p className="text-[var(--text-secondary)] flex-grow">{product.description}</p>
                  <div className="mt-4 flex justify-between items-center w-full">

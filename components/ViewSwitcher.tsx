@@ -26,7 +26,7 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView, setView }) => 
         <Tooltip key={mode} text={`Switch to ${mode} View`}>
           <motion.button
             onClick={() => setView(mode)}
-            className={`relative flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-tertiary)] focus:ring-[var(--primary-accent)] ${
+            className={`relative flex items-center justify-center p-2 lg:px-3 lg:py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-tertiary)] focus:ring-[var(--primary-accent)] ${
               currentView === mode
                 ? 'text-white'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--background-secondary)] hover:text-[var(--text-primary)]'
@@ -43,8 +43,8 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView, setView }) => 
               />
             )}
             <div className="relative z-10 flex items-center">
-                <Icon className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">{mode}</span>
+                <Icon className="w-5 h-5 lg:mr-2" />
+                <span className="hidden lg:inline">{mode}</span>
             </div>
           </motion.button>
         </Tooltip>

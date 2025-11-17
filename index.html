@@ -199,7 +199,30 @@
             right: 2rem;
             z-index: 30;
         }
+        
+        /* --- 10 NEW UI/UX ENHANCEMENT STYLES --- */
 
+        /* Tabbed Navigation in Modal */
+        .product-modal-tab {
+            position: relative;
+            padding: 0.75rem 0;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .product-modal-tab.active, .product-modal-tab:hover {
+            color: var(--text-primary);
+        }
+
+        /* Search Highlighting */
+        mark {
+            background-color: var(--primary-accent);
+            color: var(--background-primary);
+            padding: 0 2px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
     </style>
 <script type="importmap">
 {
