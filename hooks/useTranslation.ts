@@ -18,8 +18,10 @@ export const TranslationProvider = ({ children }: { children: React.ReactNode })
   const t = useCallback((key: string, replacements?: Record<string, string | number>) => {
     let translation = translations[locale][key] || translations['en'][key] || key;
     if (replacements) {
-        Object.entries(replacements).forEach(([key, value]) => {
-            translation = translation.replace(`{${key}}`, String(value));
+        Object.entries(replacements).forEach(([placeholder, value]) => {
+            // Use a regex with the 'g' flag to replace all instances of the placeholder
+            const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
+            translation = translation.replace(regex, String(value));
         });
     }
     return translation;
