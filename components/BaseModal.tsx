@@ -89,10 +89,15 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, title 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/70 z-40"
-            onClick={onClose}
             aria-hidden="true"
           />
-          <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:justify-center p-0 md:p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div 
+            className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:justify-center p-0 md:p-4" 
+            role="dialog" 
+            aria-modal="true" 
+            aria-labelledby="modal-title"
+            onClick={onClose}
+          >
             <motion.div
               ref={modalRef}
               className="bg-[var(--background-secondary)] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-t-[var(--border-radius)] md:rounded-[var(--border-radius)] shadow-2xl flex flex-col"
@@ -105,6 +110,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, title 
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={handleDragEnd}
+              onClick={(e) => e.stopPropagation()}
             >
               <header 
                 className={`flex items-center justify-between p-4 border-b border-[var(--border-color)] ${!isMobile ? 'cursor-move' : ''}`}

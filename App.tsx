@@ -94,7 +94,7 @@ const AppContent: React.FC = () => {
   const [isCompareModalOpen, setCompareModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isVisualSearchOpen, setVisualSearchOpen] = useState(false);
-  const [isOnboardingOpen, setOnboardingOpen] = useLocalStorage('onboardingSeen', true);
+  const [isOnboardingOpen, setOnboardingOpen] = useLocalStorage('onboardingSeen', false);
   const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const [flyingImage, setFlyingImage] = useState<{ src: string; rect: DOMRect } | null>(null);
   const [isZenMode, setZenMode] = useState(false);
