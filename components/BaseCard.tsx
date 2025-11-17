@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 // FIX: Import Variants type from framer-motion to correctly type the variants object.
 import { motion, useMotionValue, useTransform, Variants } from 'framer-motion';

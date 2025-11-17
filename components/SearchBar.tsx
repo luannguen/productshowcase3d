@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SearchIcon, CloseIcon, MicIcon } from './icons';
 import Tooltip from './Tooltip';

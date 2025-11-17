@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense, useRef } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption, QuickViewProduct, WishlistItem, RecentlyViewedItem, ChatMessage, Appearance, CompareItem, Locale, BreadcrumbItem, OnboardingStep } from './types';
@@ -75,7 +76,7 @@ const AppContent: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -83,18 +84,19 @@ const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
 
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [wishlist, setWishlist] = useLocalStorage<WishlistItem[]>('wishlist', []);
   const [isWishlistOpen, setWishlistOpen] = useState(false);
-  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useLocalStorage<RecentlyViewedItem[]>('recentlyViewed', []);
   const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct>(null);
   const [isAIAssistantOpen, setAIAssistantOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [visibleProductsCount, setVisibleProductsCount] = useState(ITEMS_PER_PAGE);
-  const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
+  const [compareItems, setCompareItems] = useLocalStorage<CompareItem[]>('compareItems', []);
   const [isCompareModalOpen, setCompareModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isVisualSearchOpen, setVisualSearchOpen] = useState(false);
-  const [isOnboardingOpen, setOnboardingOpen] = useLocalStorage('onboardingSeen', false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useLocalStorage('onboardingSeen', false);
+  const [isOnboardingOpen, setOnboardingOpen] = useState(!hasSeenOnboarding);
   const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const [flyingImage, setFlyingImage] = useState<{ src: string; rect: DOMRect } | null>(null);
   const [isZenMode, setZenMode] = useState(false);
@@ -108,12 +110,18 @@ const AppContent: React.FC = () => {
   const cartIconRef = useRef<HTMLButtonElement>(null);
 
   const isSystemDark = useMemo(() => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches, []);
-  const finalAppearance = useMemo(() => appearance === Appearance.System ? (isSystemDark ? Appearance.Dark : Appearance.Light) : appearance, [appearance, isSystemDark]);
+  const finalAppearance = useMemo(() => {
+    if (appearance === Appearance.System) {
+        return isSystemDark ? Appearance.Dark : Appearance.Light;
+    }
+    return appearance;
+  }, [appearance, isSystemDark]);
+
   const currentThemeStyles = appThemes[activeTheme].styles[finalAppearance];
   const PRODUCTS = appThemes[activeTheme].products;
   
   useEffect(() => {
-    document.documentElement.className = finalAppearance;
+    document.documentElement.className = finalAppearance === 'high-contrast' ? 'dark' : finalAppearance;
     document.body.classList.toggle('zen-mode', isZenMode);
   }, [finalAppearance, isZenMode]);
   
@@ -187,7 +195,7 @@ const AppContent: React.FC = () => {
 
   const paginatedProducts = useMemo(() => filteredProducts.slice(0, visibleProductsCount), [filteredProducts, visibleProductsCount]);
 
-  useEffect(() => { setAnnouncerMessage(debouncedSearchQuery ? `${t('showing')} ${filteredProducts.length} ${t('products')}.` : ''); }, [filteredProducts.length, debouncedSearchQuery, t]);
+  useEffect(() => { setAnnouncerMessage(debouncedSearchQuery ? `Showing ${filteredProducts.length} products.` : ''); }, [filteredProducts.length, debouncedSearchQuery]);
 
   const handleSetView = useCallback((newView: ViewMode) => {
     setViewMode(newView);
@@ -210,10 +218,9 @@ const AppContent: React.FC = () => {
       if (existing) return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
       return [...prev, { product, quantity }];
     });
-    addToast(`${product.name} ${t('addedToCart')}`);
-  }, [reduceMotion, t]);
+    addToast(`${product.name} added to cart.`);
+  }, [reduceMotion, setCart]);
 
-  // FIX: Add missing `onAddToCollection` and `onNotifyMe` handlers required by view components.
   const handleAddToCollection = useCallback((product: Product) => {
     addToast(`${product.name} has been added to a collection.`);
   }, []);
@@ -227,8 +234,7 @@ const AppContent: React.FC = () => {
       const cartRect = cartIconRef.current?.getBoundingClientRect();
       if (cartRect) {
         const flyAnimation = async () => {
-          // You would use a dedicated animation library here, this is a simplified example
-          await new Promise(resolve => setTimeout(resolve, 500)); // Simulate animation
+          await new Promise(resolve => setTimeout(resolve, 500)); 
           if (!reduceMotion) cartIconControls.start({ scale: [1, 1.3, 1], rotate: [0, -10, 10, 0], transition: { duration: 0.5 } });
           setFlyingImage(null);
         };
@@ -241,7 +247,7 @@ const AppContent: React.FC = () => {
   const handleRemoveFromCart = (id: number) => setCart(p => p.filter(i => i.product.id !== id));
   const handleClearCart = () => setConfirmation({ title: 'Clear Cart', message: 'Are you sure you want to remove all items from your cart?', onConfirm: () => { setCart([]); setConfirmation(null); } });
   const handleCheckout = () => { setCartModalOpen(false); setPurchaseModalOpen(true); };
-  const handlePurchaseSuccess = () => { addToast(t('purchaseSuccess')); setPurchaseModalOpen(false); setCart([]); };
+  const handlePurchaseSuccess = () => { addToast('Purchase successful!'); setPurchaseModalOpen(false); setCart([]); };
   const handleUpdateProductImage = (id: number, url: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, imageUrl: url } : p) } }));
   const handleUpdateProductDescription = (id: number, desc: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, description: desc } : p) } }));
   const handleUpdateProductStory = (id: number, story: { title: string; narrative: string; }) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, story: { ...p.story!, ...story } } : p) } }));
@@ -257,7 +263,7 @@ const AppContent: React.FC = () => {
   const isProductInCompare = (id: number) => compareItems.some(p => p.id === id);
 
   const cartItemCount = useMemo(() => cart.reduce((t, i) => t + i.quantity, 0), [cart]);
-  const isAnyModalOpen = isManageModalOpen || isPurchaseModalOpen || !!selectedProduct || isCartModalOpen || isCommandPaletteOpen || isMobileMenuOpen || !!quickViewProduct || isWishlistOpen || isCompareModalOpen || isSettingsModalOpen || isVisualSearchOpen || isOnboardingOpen || !!confirmation;
+  const isAnyModalOpen = isManageModalOpen || isPurchaseModalOpen || !!selectedProduct || isCartModalOpen || isCommandPaletteOpen || isMobileMenuOpen || !!quickViewProduct || isWishlistOpen || isCompareModalOpen || isSettingsModalOpen || isVisualSearchOpen || !!confirmation;
   
   useEffect(() => { document.body.style.overflow = isAnyModalOpen ? 'hidden' : 'auto'; }, [isAnyModalOpen]);
 
@@ -284,7 +290,6 @@ const AppContent: React.FC = () => {
         </div>
       );
     }
-    // FIX: Pass the new handlers `onAddToCollection` and `onNotifyMe` to the view components.
     const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist, onToggleCompare: handleToggleCompare, isProductInCompare, onAddToCollection: handleAddToCollection, onNotifyMe: handleNotifyMe };
     const viewProps = { ...baseProps, products: paginatedProducts, reduceMotion };
     const viewPropsWithSearch = { ...viewProps, searchQuery: debouncedSearchQuery };
@@ -294,7 +299,7 @@ const AppContent: React.FC = () => {
       case ViewMode.List: return <ListView {...viewPropsWithSearch} />;
       case ViewMode.Table: return <TableView products={paginatedProducts} onProductClick={handleProductClick} />;
       case ViewMode.Flip: return <FlipView {...viewProps} />;
-      case ViewMode.Carousel: return <CarouselView {...viewProps} />;
+      case ViewMode.Carousel: return <CarouselView products={paginatedProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
       case ViewMode.ThreeD: return <ThreeDView themeStyles={currentThemeStyles} />;
       case ViewMode.Story: return <StoryView {...baseProps} products={paginatedProducts.filter(p => p.story)} reduceMotion={reduceMotion} />;
       default: return <GridView {...viewPropsWithSearch} />;
@@ -303,7 +308,6 @@ const AppContent: React.FC = () => {
   
   const filterProps = { priceRange, setPriceRange, maxPrice, categories: allAvailableProducts, selectedCategories, setSelectedCategories, colors: allAvailableColors, selectedColors, setSelectedColors, sortOption, setSortOption, resetFilters };
   const settingsProps = { activeTheme, setActiveTheme, appearance, setAppearance, reduceMotion, setReduceMotion, locale, setLocale };
-  const themeSwitcherProps = { currentTheme: activeTheme, setTheme: setActiveTheme };
   
   return (
     <>
@@ -396,7 +400,7 @@ const AppContent: React.FC = () => {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CompareTray items={compareItems} onRemove={handleToggleCompare} onCompare={() => setCompareModalOpen(true)} onClear={() => setCompareItems([])} />
       
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterPopoverProps={filterProps} themeSwitcherProps={themeSwitcherProps} viewSwitcherProps={{ currentView: viewMode, setView: handleSetView }} surpriseMe={surpriseMe} openCommandPalette={() => setCommandPaletteOpen(true)} openManageModal={() => setManageModalOpen(true)} openSettingsModal={() => setSettingsModalOpen(true)} />
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterPopoverProps={filterProps} themeSwitcherProps={{ currentTheme: activeTheme, setTheme: setActiveTheme }} viewSwitcherProps={{ currentView: viewMode, setView: handleSetView }} surpriseMe={surpriseMe} openCommandPalette={() => setCommandPaletteOpen(true)} openManageModal={() => setManageModalOpen(true)} openSettingsModal={() => setSettingsModalOpen(true)} />
       
       <Suspense>{isAIAssistantOpen && <AIAssistant isOpen={isAIAssistantOpen} setIsOpen={setAIAssistantOpen} chatHistory={chatHistory} setChatHistory={setChatHistory} products={PRODUCTS}/>}</Suspense>
       <button onClick={() => setAIAssistantOpen(true)} className="ai-assistant-button fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-30 p-4 bg-[var(--primary-accent)] text-white rounded-full shadow-lg hover:bg-[var(--primary-accent-hover)] transition-all transform hover:scale-110" aria-label="Open AI Assistant"><MessageSquareIcon className="w-8 h-8" /></button>
@@ -412,7 +416,7 @@ const AppContent: React.FC = () => {
           {isSettingsModalOpen && <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} {...settingsProps} />}
           {isCompareModalOpen && <CompareModal isOpen={isCompareModalOpen} onClose={() => setCompareModalOpen(false)} items={compareItems} allProducts={PRODUCTS} />}
           {isVisualSearchOpen && <VisualSearchModal isOpen={isVisualSearchOpen} onClose={() => setVisualSearchOpen(false)} allProducts={PRODUCTS} onProductClick={handleProductClick} />}
-          {isOnboardingOpen && <OnboardingTour isOpen={isOnboardingOpen} onClose={() => setOnboardingOpen(false)} />}
+          {isOnboardingOpen && <OnboardingTour isOpen={isOnboardingOpen} onClose={() => { setOnboardingOpen(false); setHasSeenOnboarding(true); }} />}
           {confirmation && <ConfirmationModal isOpen={!!confirmation} onClose={() => setConfirmation(null)} title={confirmation.title} message={confirmation.message} onConfirm={confirmation.onConfirm} />}
       </Suspense>
     </>
