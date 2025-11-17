@@ -41,7 +41,7 @@ const FilterControls: React.FC<FilterPopoverProps> = ({
     
     const activeFilterCount =
         (priceRange.min > 0 || priceRange.max < maxPrice ? 1 : 0) +
-        (selectedCategories.length > 0 ? 1 : 0) +
+        selectedCategories.length +
         (sortOption !== 'default' ? 1 : 0);
         
     return (
@@ -57,8 +57,8 @@ const FilterControls: React.FC<FilterPopoverProps> = ({
                     <div className="flex justify-between text-sm font-semibold text-[var(--text-primary)] mt-2 tabular-nums"><span>${priceRange.min}</span><span>${priceRange.max}</span></div>
                     <div className="mt-2 relative h-5 flex items-center">
                         <div className="absolute w-full h-1 bg-[var(--background-tertiary)] rounded-full"><div className="absolute h-1 bg-[var(--primary-accent)] rounded-full" style={{ left: `${minPos}%`, right: `${100 - maxPos}%` }} /></div>
-                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => setPriceRange({ ...priceRange, min: Math.min(Number(e.target.value), priceRange.max - 1) })} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Minimum price" />
-                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => setPriceRange({ ...priceRange, max: Math.max(Number(e.target.value), priceRange.min + 1) })} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Maximum price" />
+                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => { const newMin = Number(e.target.value); setPriceRange({ min: newMin, max: Math.max(newMin, priceRange.max) }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Minimum price" />
+                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => { const newMax = Number(e.target.value); setPriceRange({ max: newMax, min: Math.min(newMax, priceRange.min) }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Maximum price" />
                     </div>
                 </div>
                 <div>
@@ -88,10 +88,10 @@ const FilterPopover: React.FC<FilterPopoverProps> = (props) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  const activeFilterCount =
-    (props.priceRange.min > 0 || props.priceRange.max < props.maxPrice ? 1 : 0) +
-    (props.selectedCategories.length > 0 ? 1 : 0) +
-    (props.sortOption !== 'default' ? 1 : 0);
+    const activeFilterCount =
+        (props.priceRange.min > 0 || props.priceRange.max < props.maxPrice ? 1 : 0) +
+        props.selectedCategories.length +
+        (props.sortOption !== 'default' ? 1 : 0);
 
   return (
     <div className="relative" ref={popoverRef}>

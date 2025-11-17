@@ -211,7 +211,7 @@ const App: React.FC = () => {
   const surpriseMe = () => handleProductClick(PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)]);
 
   const handleToggleWishlist = (product: Product) => {
-    setWishlist(prev => prev.find(p => p.id === product.id) ? prev.filter(p => p.id !== product.id) : [...prev, product]);
+    setWishlist(prev => prev.find(p => p.id === product.id) ? prev.filter(p => p.id === product.id) : [...prev, product]);
   };
   const isProductInWishlist = (id: number) => wishlist.some(p => p.id === id);
 

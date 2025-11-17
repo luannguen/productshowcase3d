@@ -115,15 +115,26 @@
         }
 
         /* Redesigned Product Badges */
+        .product-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            z-index: 10;
+        }
         .product-badge-new {
             background-color: var(--primary-accent) !important;
             color: var(--background-primary, #111827) !important;
             font-weight: 700 !important;
+            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1), 0 2px 8px 0 rgba(0,0,0,0.1);
         }
         .product-badge-bestseller {
-            background-color: var(--header-gradient-from) !important;
+            background: linear-gradient(45deg, var(--header-gradient-from), var(--header-gradient-to));
             color: var(--background-primary, #111827) !important;
             font-weight: 700 !important;
+            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1), 0 2px 8px 0 rgba(0,0,0,0.1);
         }
 
         /* AI Assistant Chat Bubble */
@@ -142,9 +153,115 @@
             backdrop-filter: blur(12px);
         }
         
-        /* Price Slider - existing styles are sufficient */
-        /* ... */
+        /* Price Slider Range Input Thumb Style */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: var(--primary-accent);
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -0.5rem;
+            pointer-events: all;
+            border: 2px solid var(--background-secondary);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: var(--primary-accent);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            border: 2px solid var(--background-secondary);
+        }
+
+        .product-modal-tab {
+            @apply pb-2 border-b-2 font-semibold transition-colors;
+        }
+        .product-modal-tab.active {
+            @apply border-[var(--primary-accent)] text-[var(--primary-accent)];
+        }
+        .product-modal-tab:not(.active) {
+            @apply border-transparent text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text-primary)];
+        }
         
+        .main-content-wrapper {
+            transition: transform 0.3s ease-out, filter 0.3s ease-out;
+        }
+
+        .modal-open-blur {
+            transform: scale(0.98);
+            filter: blur(4px);
+            opacity: 0.7;
+        }
+
+        .scroll-to-top-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 30;
+        }
+        .command-palette-item[data-selected='true'] {
+            background-color: var(--primary-accent);
+            color: white;
+        }
+        
+        .aurora-item {
+          position: relative;
+          overflow: hidden;
+          background: var(--background-secondary);
+          transition: transform 0.3s ease;
+        }
+        .aurora-item:hover {
+          transform: scale(1.01);
+        }
+        .aurora-item::before {
+          content: "";
+          position: absolute;
+          left: var(--x);
+          top: var(--y);
+          transform: translate(-50%, -50%);
+          width: 300px;
+          height: 300px;
+          background: radial-gradient(circle closest-side, var(--primary-accent-aurora), transparent);
+          opacity: 0;
+          transition: opacity 0.5s;
+          pointer-events: none;
+        }
+        .aurora-item:hover::before {
+          opacity: 1;
+        }
+
+        .shine-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: rotate(20deg) translateX(-150%);
+            transition: transform 0.75s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+        }
+
+        .shine-effect:hover::after {
+            transform: rotate(20deg) translateX(150%);
+        }
+
+        mark {
+            background-color: var(--primary-accent);
+            color: var(--background-primary);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+
     </style>
 <script type="importmap">
 {

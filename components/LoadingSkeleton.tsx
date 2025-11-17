@@ -45,18 +45,19 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ viewMode }) => {
+  const skeletonCount = viewMode === ViewMode.List ? 4 : 8;
   switch (viewMode) {
     case ViewMode.Grid:
     case ViewMode.Flip:
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: skeletonCount }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       );
     case ViewMode.List:
       return (
         <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonListItem key={i} />)}
+          {Array.from({ length: skeletonCount }).map((_, i) => <SkeletonListItem key={i} />)}
         </div>
       );
     case ViewMode.Table:

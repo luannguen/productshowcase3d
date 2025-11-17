@@ -40,7 +40,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
         parts: [{ text: "Hello! I'm your AI shopping assistant. How can I help you find the perfect product today?" }]
       }]);
     }
-  }, [isOpen, chatHistory, setChatHistory]);
+  }, [isOpen, chatHistory.length, setChatHistory]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,18 +53,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
 
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const model = ai.models.generateContent;
         
         const fullChatHistory = [
-            { role: 'user', parts: [{text: systemInstruction}]},
-            { role: 'model', parts: [{text: "Understood. I'm ready to assist."}]},
             ...chatHistory, 
             newUserMessage
-        ].flatMap(msg => ({ role: msg.role, parts: msg.parts }));
+        ];
 
-        const response = await model({
+        const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: fullChatHistory,
+            contents: fullChatHistory.map(msg => ({ role: msg.role, parts: msg.parts })),
+            config: {
+                systemInstruction: systemInstruction,
+            },
         });
 
         const aiResponse: ChatMessage = { role: 'model', parts: [{ text: response.text }], id: `model-${Date.now()}` };
