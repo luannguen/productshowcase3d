@@ -83,7 +83,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            background: linear-gradient(90deg, transparent, var(--shimmer-color, rgba(255, 255, 255, 0.08)), transparent);
             animation: shimmer 1.5s infinite;
         }
         @keyframes shimmer {
@@ -123,24 +123,21 @@
             font-size: 0.75rem;
             border-radius: 9999px;
             z-index: 10;
+            font-weight: 700;
+            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1), 0 2px 8px 0 rgba(0,0,0,0.1);
+            color: var(--badge-text-color);
         }
         .product-badge-new {
-            background-color: var(--primary-accent) !important;
-            color: var(--background-primary, #111827) !important;
-            font-weight: 700 !important;
-            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1), 0 2px 8px 0 rgba(0,0,0,0.1);
+            background-color: var(--primary-accent);
         }
         .product-badge-bestseller {
             background: linear-gradient(45deg, var(--header-gradient-from), var(--header-gradient-to));
-            color: var(--background-primary, #111827) !important;
-            font-weight: 700 !important;
-            box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1), 0 2px 8px 0 rgba(0,0,0,0.1);
         }
 
         /* AI Assistant Chat Bubble */
         .chat-bubble-user {
             background-color: var(--primary-accent);
-            color: white;
+            color: var(--badge-text-color);
         }
         .chat-bubble-model {
             background-color: var(--background-tertiary);
@@ -151,6 +148,12 @@
             background-color: var(--background-primary-translucent, rgba(17, 24, 39, 0.6));
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            border-bottom-width: 1px;
+            border-bottom-color: transparent;
+        }
+        .scrolled-header {
+            border-bottom-color: var(--border-color);
         }
         
         /* Price Slider Range Input Thumb Style */
@@ -257,9 +260,52 @@
 
         mark {
             background-color: var(--primary-accent);
-            color: var(--background-primary);
+            color: var(--badge-text-color);
             padding: 0 2px;
             border-radius: 3px;
+        }
+        
+        .compare-tray {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--primary-accent);
+            outline-offset: 2px;
+            border-radius: var(--border-radius);
+        }
+        
+        /* New Styles for 20 Enhancements */
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid var(--background-secondary);
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+        .color-swatch.selected {
+            box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 4px var(--primary-accent);
+        }
+        .flying-image {
+            position: fixed;
+            z-index: 1000;
+            border-radius: var(--border-radius);
+            pointer-events: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .zen-mode #main-header,
+        .zen-mode #filter-sidebar,
+        .zen-mode #app-footer,
+        .zen-mode .ai-assistant-button {
+            display: none;
         }
 
     </style>

@@ -8,6 +8,8 @@ interface StoryViewProps {
   products: Product[];
   onAddToCart: (product: Product) => void;
   onProductClick: (product: Product) => void;
+  // FIX: Added missing reduceMotion prop.
+  reduceMotion: boolean;
 }
 
 const STORY_DURATION = 8000; // 8 seconds per story

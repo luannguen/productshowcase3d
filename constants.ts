@@ -1,10 +1,15 @@
-// FIX: Add missing React import for React.CSSProperties
 import React from 'react';
-import { Product, Theme } from './types';
+import { Product, Theme, Translations } from './types';
+
+interface ThemeStyles {
+  // FIX: Allow any string key to support custom CSS properties (e.g., --font-family).
+  light: React.CSSProperties & { [key: string]: any };
+  dark: React.CSSProperties & { [key: string]: any };
+}
 
 interface AppTheme {
   products: Product[];
-  styles: React.CSSProperties;
+  styles: ThemeStyles;
 }
 
 const electronicsProducts: Product[] = [
@@ -16,6 +21,8 @@ const electronicsProducts: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&auto=format&fit=crop',
     category: 'Laptops',
     tags: ['New'],
+    stock: { level: 'in-stock', quantity: 25 },
+    colors: ['#808080', '#e0e0e0'],
     videoUrl: 'https://videos.pexels.com/video-files/3214532/3214532-hd_1920_1080_25fps.mp4',
     specifications: {
       'Processor': 'Quantum Core i9',
@@ -42,6 +49,8 @@ const electronicsProducts: Product[] = [
     price: 999.0,
     imageUrl: 'https://images.unsplash.com/photo-1587560699343-6d15b28536a6?q=80&w=800&auto=format&fit=crop',
     category: 'Smartphones',
+    stock: { level: 'low', quantity: 8 },
+    colors: ['#1e1e1e', '#f5f5f7', '#ffc107'],
     specifications: {
         'Display': '6.7-inch Super Retina XDR OLED',
         'Camera': 'Triple 12MP system (Ultra Wide, Wide, Telephoto)',
@@ -62,6 +71,8 @@ const electronicsProducts: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop',
     category: 'Audio',
     tags: ['Best Seller'],
+    stock: { level: 'in-stock', quantity: 50 },
+    colors: ['#000000', '#ffffff', '#007bff'],
     specifications: {
         'Type': 'Over-ear, closed-back',
         'Connectivity': 'Bluetooth 5.2, 3.5mm audio jack',
@@ -87,6 +98,7 @@ const electronicsProducts: Product[] = [
     price: 89.99,
     imageUrl: 'https://images.unsplash.com/photo-1629429408209-1f9122651d37?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    stock: { level: 'out-of-stock', quantity: 0 },
     specifications: {
         'Sensor': 'Optical',
         'DPI': '200 - 16,000',
@@ -106,6 +118,7 @@ const electronicsProducts: Product[] = [
     price: 169.0,
     imageUrl: 'https://images.unsplash.com/photo-1593106578502-28fa75da9d99?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    stock: { level: 'in-stock', quantity: 30 },
     specifications: {
         'Resolution': '1080p / 60fps',
         'Focus Type': 'Autofocus',
@@ -125,6 +138,7 @@ const electronicsProducts: Product[] = [
     price: 199.99,
     imageUrl: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=800&auto=format&fit=crop',
     category: 'Peripherals',
+    stock: { level: 'in-stock', quantity: 15 },
     specifications: {
         'Switch Type': 'Tactile Brown Switches',
         'Layout': 'Tenkeyless (87 keys)',
@@ -144,6 +158,8 @@ const electronicsProducts: Product[] = [
     price: 249.0,
     imageUrl: 'https://images.unsplash.com/photo-1544117519-31a4b719223d?q=80&w=800&auto=format&fit=crop',
     category: 'Wearables',
+    stock: { level: 'low', quantity: 10 },
+    colors: ['#333333', '#c0c0c0', '#f0e68c'],
     specifications: {
         'Display': '1.4-inch AMOLED',
         'Compatibility': 'iOS and Android',
@@ -164,6 +180,7 @@ const electronicsProducts: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1598986646512-9213b0ae9387?q=80&w=800&auto=format&fit=crop',
     category: 'Gaming',
     tags: ['Best Seller'],
+    stock: { level: 'in-stock', quantity: 5 },
     specifications: {
         'CPU': 'Intel Core i9-13900K',
         'GPU': 'NVIDIA GeForce RTX 4090',
@@ -192,6 +209,8 @@ const youthfulProducts: Product[] = [
         imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ab?q=80&w=800&auto=format&fit=crop',
         category: 'Footwear',
         tags: ['Best Seller'],
+        stock: { level: 'in-stock', quantity: 100 },
+        colors: ['#ffffff', '#000000', '#ff00ff'],
         specifications: {
             'Upper Material': 'Knit Mesh and Synthetic Overlays',
             'Sole': 'Chunky Rubber Outsole',
@@ -215,6 +234,7 @@ const youthfulProducts: Product[] = [
         price: 199.00, 
         imageUrl: 'https://images.unsplash.com/photo-1545127398-14699f92334b?q=80&w=800&auto=format&fit=crop', 
         category: 'Accessories',
+        stock: { level: 'in-stock', quantity: 40 },
         specifications: {
             'Type': 'On-ear',
             'Connectivity': 'Bluetooth 5.0',
@@ -234,6 +254,7 @@ const youthfulProducts: Product[] = [
         imageUrl: 'https://images.unsplash.com/photo-1604502528143-7a6c533446b3?q=80&w=800&auto=format&fit=crop', 
         category: 'Gear',
         tags: ['New'],
+        stock: { level: 'low', quantity: 9 },
         specifications: {
             'Resolution': '64x64 Pixels',
             'Display Size': '10 inches',
@@ -252,6 +273,7 @@ const youthfulProducts: Product[] = [
         price: 89.99, 
         imageUrl: 'https://images.unsplash.com/photo-1547466838-8d43d3a53c8c?q=80&w=800&auto=format&fit=crop',
         category: 'Gear',
+        stock: { level: 'in-stock', quantity: 60 },
         specifications: {
             'Deck Material': '7-ply Canadian Maple',
             'Size': '8.25" x 32"',
@@ -276,6 +298,7 @@ const youthfulProducts: Product[] = [
         price: 79.00, 
         imageUrl: 'https://images.unsplash.com/photo-1604335293424-73d756c12808?q=80&w=800&auto=format&fit=crop', 
         category: 'Gear',
+        stock: { level: 'in-stock', quantity: 20 },
         specifications: {
             'Size': '18-inch Diameter',
             'Color Temperature': '3200K - 5600K Adjustable',
@@ -294,6 +317,7 @@ const youthfulProducts: Product[] = [
         price: 69.99, 
         imageUrl: 'https://images.unsplash.com/photo-1556819842-15a3a0e1a1b3?q=80&w=800&auto=format&fit=crop', 
         category: 'Apparel',
+        stock: { level: 'out-of-stock', quantity: 0 },
         specifications: {
             'Material': '80% Cotton, 20% Polyester Fleece',
             'Fit': 'Oversized, Drop Shoulder',
@@ -312,6 +336,7 @@ const youthfulProducts: Product[] = [
         price: 59.00, 
         imageUrl: 'https://images.unsplash.com/photo-1600981335960-a2420938a16c?q=80&w=800&auto=format&fit=crop', 
         category: 'Accessories',
+        stock: { level: 'in-stock', quantity: 80 },
         specifications: {
             'DPI': 'Up to 12,000',
             'Sensor': 'PixArt Optical Sensor',
@@ -330,6 +355,7 @@ const youthfulProducts: Product[] = [
         price: 39.00, 
         imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=800&auto=format&fit=crop', 
         category: 'Accessories',
+        stock: { level: 'in-stock', quantity: 120 },
         specifications: {
             'Dimensions': '900mm x 400mm x 4mm',
             'Material': 'Micro-woven Cloth Surface',
@@ -352,6 +378,7 @@ const fashionProducts: Product[] = [
         imageUrl: 'https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?q=80&w=800&auto=format&fit=crop',
         category: 'Accessories',
         tags: ['Best Seller'],
+        stock: { level: 'in-stock', quantity: 12 },
         specifications: {
             'Case Material': '316L Stainless Steel',
             'Movement': 'Swiss Automatic (ETA 2824-2)',
@@ -376,6 +403,7 @@ const fashionProducts: Product[] = [
         price: 450.00, 
         imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800&auto=format&fit=crop', 
         category: 'Bags',
+        stock: { level: 'low', quantity: 7 },
         specifications: {
             'Material': 'Full-Grain Italian Leather',
             'Dimensions': '15" x 11" x 4"',
@@ -394,6 +422,8 @@ const fashionProducts: Product[] = [
         price: 120.00, 
         imageUrl: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800&auto=format&fit=crop', 
         category: 'Accessories',
+        stock: { level: 'in-stock', quantity: 35 },
+        colors: ['#ffc0cb', '#87ceeb', '#90ee90'],
         specifications: {
             'Material': '100% Mulberry Silk',
             'Dimensions': '35" x 35" (90cm x 90cm)',
@@ -413,6 +443,8 @@ const fashionProducts: Product[] = [
         imageUrl: 'https://images.unsplash.com/photo-1517942491322-1c6ada40a2c0?q=80&w=800&auto=format&fit=crop',
         category: 'Apparel',
         tags: ['New'],
+        stock: { level: 'in-stock', quantity: 22 },
+        colors: ['#f5f5dc', '#d2b48c', '#000000'],
         videoUrl: "https://videos.pexels.com/video-files/8053350/8053350-hd_1920_1080_25fps.mp4",
         specifications: {
             'Material': '100% Cotton Gabardine',
@@ -438,6 +470,8 @@ const fashionProducts: Product[] = [
         price: 600.00, 
         imageUrl: 'https://images.unsplash.com/photo-1595509553306-932f91b6c771?q=80&w=800&auto=format&fit=crop', 
         category: 'Apparel',
+        stock: { level: 'low', quantity: 4 },
+        colors: ['#800000', '#000080', '#006400'],
         specifications: {
             'Fabric': 'Stretch Velvet',
             'Fit': 'Mermaid Silhouette',
@@ -456,6 +490,8 @@ const fashionProducts: Product[] = [
         price: 180.00, 
         imageUrl: 'https://images.unsplash.com/photo-1519758369395-97995f54032b?q=80&w=800&auto=format&fit=crop', 
         category: 'Footwear',
+        stock: { level: 'in-stock', quantity: 45 },
+        colors: ['#a0522d', '#696969'],
         specifications: {
             'Upper Material': 'Genuine Suede',
             'Heel Height': '2.5 inches (6.5cm)',
@@ -474,6 +510,7 @@ const fashionProducts: Product[] = [
         price: 250.00, 
         imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&auto=format&fit=crop', 
         category: 'Accessories',
+        stock: { level: 'out-of-stock', quantity: 0 },
         specifications: {
             'Frame Material': 'Acetate',
             'Lens': 'Polarized, Gradient',
@@ -492,6 +529,8 @@ const fashionProducts: Product[] = [
         price: 300.00, 
         imageUrl: 'https://images.unsplash.com/photo-1620799140159-48301732642a?q=80&w=800&auto=format&fit=crop', 
         category: 'Apparel',
+        stock: { level: 'in-stock', quantity: 30 },
+        colors: ['#f5f5dc', '#dcdcdc', '#add8e6'],
         specifications: {
             'Material': '100% Grade-A Cashmere',
             'Knit': '2-ply',
@@ -505,81 +544,204 @@ const fashionProducts: Product[] = [
     },
 ];
 
+const sharedLightStyles = {
+    '--shimmer-color': 'rgba(0, 0, 0, 0.08)',
+    '--badge-text-color': '#111827',
+};
+
+const sharedDarkStyles = {
+    '--shimmer-color': 'rgba(255, 255, 255, 0.08)',
+    '--badge-text-color': '#FFFFFF',
+};
 
 export const themes: Record<Theme, AppTheme> = {
   [Theme.Electronics]: {
     products: electronicsProducts,
     styles: {
-      '--font-family': "'Poppins', sans-serif",
-      '--background-primary': '#111827',
-      '--background-primary-translucent': 'rgba(17, 24, 39, 0.6)',
-      '--background-secondary': '#1f2937',
-      '--background-secondary-translucent': 'rgba(31, 41, 55, 0.5)',
-      '--background-tertiary': '#374151',
-      '--text-primary': '#f9fafb',
-      '--text-secondary': '#d1d5db',
-      '--text-tertiary': '#9ca3af',
-      '--primary-accent': '#22d3ee',
-      '--primary-accent-hover': '#67e8f9',
-      '--primary-accent-darker': '#15b6d1',
-      '--primary-accent-aurora': 'rgba(34, 211, 238, 0.15)',
-      '--border-color': '#374151',
-      '--border-radius': '0.5rem',
-      '--header-gradient-from': '#a78bfa',
-      '--header-gradient-to': '#67e8f9',
-      '--bg-gradient-1': '#0f172a',
-      '--bg-gradient-2': '#1e293b',
-      '--bg-gradient-3': '#132a4a',
-    } as React.CSSProperties,
+      light: {
+        ...sharedLightStyles,
+        '--font-family': "'Poppins', sans-serif",
+        '--background-primary': '#f9fafb',
+        '--background-primary-translucent': 'rgba(249, 250, 251, 0.6)',
+        '--background-secondary': '#ffffff',
+        '--background-tertiary': '#f3f4f6',
+        '--text-primary': '#111827',
+        '--text-secondary': '#374151',
+        '--text-tertiary': '#6b7280',
+        '--primary-accent': '#0ea5e9',
+        '--primary-accent-hover': '#38bdf8',
+        '--primary-accent-aurora': 'rgba(14, 165, 233, 0.15)',
+        '--border-color': '#e5e7eb',
+        '--border-radius': '0.5rem',
+        '--header-gradient-from': '#a78bfa',
+        '--header-gradient-to': '#38bdf8',
+        '--bg-gradient-1': '#f0f9ff',
+        '--bg-gradient-2': '#e0f2fe',
+        '--bg-gradient-3': '#f0f9ff',
+      },
+      dark: {
+        ...sharedDarkStyles,
+        '--font-family': "'Poppins', sans-serif",
+        '--background-primary': '#111827',
+        '--background-primary-translucent': 'rgba(17, 24, 39, 0.6)',
+        '--background-secondary': '#1f2937',
+        '--background-tertiary': '#374151',
+        '--text-primary': '#f9fafb',
+        '--text-secondary': '#d1d5db',
+        '--text-tertiary': '#9ca3af',
+        '--primary-accent': '#22d3ee',
+        '--primary-accent-hover': '#67e8f9',
+        '--primary-accent-aurora': 'rgba(34, 211, 238, 0.15)',
+        '--border-color': '#374151',
+        '--border-radius': '0.5rem',
+        '--header-gradient-from': '#a78bfa',
+        '--header-gradient-to': '#67e8f9',
+        '--bg-gradient-1': '#0f172a',
+        '--bg-gradient-2': '#1e293b',
+        '--bg-gradient-3': '#132a4a',
+      },
+    },
   },
   [Theme.Youthful]: {
     products: youthfulProducts,
     styles: {
-        '--font-family': "'Poppins', sans-serif",
-        '--background-primary': '#1a1a2e',
-        '--background-primary-translucent': 'rgba(26, 26, 46, 0.6)',
-        '--background-secondary': '#16213e',
-        '--background-secondary-translucent': 'rgba(22, 33, 62, 0.6)',
-        '--background-tertiary': '#0f3460',
-        '--text-primary': '#ffffff',
-        '--text-secondary': '#a7a9be',
-        '--text-tertiary': '#e94560',
-        '--primary-accent': '#e94560',
-        '--primary-accent-hover': '#f9a8d4',
-        '--primary-accent-darker': '#d0334c',
-        '--primary-accent-aurora': 'rgba(233, 69, 96, 0.2)',
-        '--border-color': '#0f3460',
-        '--border-radius': '1rem',
-        '--header-gradient-from': '#f9a8d4',
-        '--header-gradient-to': '#e94560',
-        '--bg-gradient-1': '#1a1a2e',
-        '--bg-gradient-2': '#16213e',
-        '--bg-gradient-3': '#2e1a2a',
-    } as React.CSSProperties,
+        light: {
+            ...sharedLightStyles,
+            '--font-family': "'Poppins', sans-serif",
+            '--background-primary': '#ffffff',
+            '--background-primary-translucent': 'rgba(255, 255, 255, 0.6)',
+            '--background-secondary': '#f9f9f9',
+            '--background-tertiary': '#eef2f7',
+            '--text-primary': '#1a1a2e',
+            '--text-secondary': '#555770',
+            '--text-tertiary': '#898a9a',
+            '--primary-accent': '#e94560',
+            '--primary-accent-hover': '#f36d84',
+            '--primary-accent-aurora': 'rgba(233, 69, 96, 0.2)',
+            '--border-color': '#eef2f7',
+            '--border-radius': '1rem',
+            '--header-gradient-from': '#f9a8d4',
+            '--header-gradient-to': '#e94560',
+            '--bg-gradient-1': '#fff1f2',
+            '--bg-gradient-2': '#ffe4e6',
+            '--bg-gradient-3': '#fff1f2',
+        },
+        dark: {
+            ...sharedDarkStyles,
+            '--font-family': "'Poppins', sans-serif",
+            '--background-primary': '#1a1a2e',
+            '--background-primary-translucent': 'rgba(26, 26, 46, 0.6)',
+            '--background-secondary': '#16213e',
+            '--background-tertiary': '#0f3460',
+            '--text-primary': '#ffffff',
+            '--text-secondary': '#a7a9be',
+            '--text-tertiary': '#e94560',
+            '--primary-accent': '#e94560',
+            '--primary-accent-hover': '#f9a8d4',
+            '--primary-accent-aurora': 'rgba(233, 69, 96, 0.2)',
+            '--border-color': '#0f3460',
+            '--border-radius': '1rem',
+            '--header-gradient-from': '#f9a8d4',
+            '--header-gradient-to': '#e94560',
+            '--bg-gradient-1': '#1a1a2e',
+            '--bg-gradient-2': '#16213e',
+            '--bg-gradient-3': '#2e1a2a',
+        },
+    },
   },
   [Theme.Fashion]: {
     products: fashionProducts,
     styles: {
-      '--font-family': "'Playfair Display', serif",
-      '--background-primary': '#2d2d2d',
-      '--background-primary-translucent': 'rgba(45, 45, 45, 0.6)',
-      '--background-secondary': '#3c3c3c',
-      '--background-secondary-translucent': 'rgba(60, 60, 60, 0.5)',
-      '--background-tertiary': '#4a4a4a',
-      '--text-primary': '#f5f5f4',
-      '--text-secondary': '#a8a29e',
-      '--text-tertiary': '#eab308',
-      '--primary-accent': '#eab308',
-      '--primary-accent-hover': '#fde047',
-      '--primary-accent-darker': '#c89a07',
-      '--primary-accent-aurora': 'rgba(234, 179, 8, 0.15)',
-      '--border-color': '#4a4a4a',
-      '--border-radius': '0.25rem',
-      '--header-gradient-from': '#eab308',
-      '--header-gradient-to': '#fde047',
-      '--bg-gradient-1': '#2d2d2d',
-      '--bg-gradient-2': '#4a4a4a',
-      '--bg-gradient-3': '#1c1c1c',
-    } as React.CSSProperties,
+      light: {
+        ...sharedLightStyles,
+        '--font-family': "'Playfair Display', serif",
+        '--background-primary': '#f5f5f4',
+        '--background-primary-translucent': 'rgba(245, 245, 244, 0.6)',
+        '--background-secondary': '#ffffff',
+        '--background-tertiary': '#e7e5e4',
+        '--text-primary': '#2d2d2d',
+        '--text-secondary': '#57534e',
+        '--text-tertiary': '#78716c',
+        '--primary-accent': '#ca8a04',
+        '--primary-accent-hover': '#eab308',
+        '--primary-accent-aurora': 'rgba(202, 138, 4, 0.15)',
+        '--border-color': '#d6d3d1',
+        '--border-radius': '0.25rem',
+        '--header-gradient-from': '#fde047',
+        '--header-gradient-to': '#ca8a04',
+        '--bg-gradient-1': '#fefce8',
+        '--bg-gradient-2': '#fef9c3',
+        '--bg-gradient-3': '#fefce8',
+      },
+      dark: {
+        ...sharedDarkStyles,
+        '--font-family': "'Playfair Display', serif",
+        '--background-primary': '#2d2d2d',
+        '--background-primary-translucent': 'rgba(45, 45, 45, 0.6)',
+        '--background-secondary': '#3c3c3c',
+        '--background-tertiary': '#4a4a4a',
+        '--text-primary': '#f5f5f4',
+        '--text-secondary': '#a8a29e',
+        '--text-tertiary': '#eab308',
+        '--primary-accent': '#eab308',
+        '--primary-accent-hover': '#fde047',
+        '--primary-accent-aurora': 'rgba(234, 179, 8, 0.15)',
+        '--border-color': '#4a4a4a',
+        '--border-radius': '0.25rem',
+        '--header-gradient-from': '#eab308',
+        '--header-gradient-to': '#fde047',
+        '--bg-gradient-1': '#2d2d2d',
+        '--bg-gradient-2': '#4a4a4a',
+        '--bg-gradient-3': '#1c1c1c',
+      },
+    },
   },
+};
+
+
+export const translations: Translations = {
+  en: {
+    'showcaseTitle': 'Showcase',
+    'searchPlaceholder': 'Search products...',
+    'surpriseMeTooltip': 'Surprise Me!',
+    'commandPaletteTooltip': 'Command Palette (Ctrl+K)',
+    'manageProductsTooltip': 'Manage Products',
+    'wishlistTooltip': 'Wishlist ({count})',
+    'cartTooltip': 'Cart ({count})',
+    'settingsTooltip': 'Settings',
+    'loadMore': 'Load More',
+    'noProductsFound': 'No Products Found',
+    'noProductsFoundDesc': 'Try adjusting your search or filter criteria.',
+    'recentlyViewed': 'Recently Viewed',
+    'footerSlogan': 'The ultimate product viewing experience.',
+    'quickLinks': 'Quick Links',
+    'aboutUs': 'About Us',
+    'contact': 'Contact',
+    'faq': 'FAQ',
+    'followUs': 'Follow Us',
+    'followUsDesc': 'Join our community on social media.',
+    'copyright': '© {year} Showcase. All rights reserved.',
+  },
+  vi: {
+    'showcaseTitle': 'Trưng bày',
+    'searchPlaceholder': 'Tìm kiếm sản phẩm...',
+    'surpriseMeTooltip': 'Gây bất ngờ cho tôi!',
+    'commandPaletteTooltip': 'Bảng lệnh (Ctrl+K)',
+    'manageProductsTooltip': 'Quản lý Sản phẩm',
+    'wishlistTooltip': 'Danh sách Yêu thích ({count})',
+    'cartTooltip': 'Giỏ hàng ({count})',
+    'settingsTooltip': 'Cài đặt',
+    'loadMore': 'Tải thêm',
+    'noProductsFound': 'Không tìm thấy sản phẩm',
+    'noProductsFoundDesc': 'Hãy thử điều chỉnh tiêu chí tìm kiếm hoặc bộ lọc của bạn.',
+    'recentlyViewed': 'Đã xem gần đây',
+    'footerSlogan': 'Trải nghiệm xem sản phẩm đỉnh cao.',
+    'quickLinks': 'Liên kết nhanh',
+    'aboutUs': 'Về chúng tôi',
+    'contact': 'Liên hệ',
+    'faq': 'Câu hỏi thường gặp',
+    'followUs': 'Theo dõi chúng tôi',
+    'followUsDesc': 'Tham gia cộng đồng của chúng tôi trên mạng xã hội.',
+    'copyright': '© {year} Showcase. Mọi quyền được bảo lưu.',
+  }
 };

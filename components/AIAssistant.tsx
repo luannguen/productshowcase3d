@@ -8,7 +8,6 @@ interface AIAssistantProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   chatHistory: ChatMessage[];
-  // FIX: Correctly type `setChatHistory` to allow functional updates from `useState`.
   setChatHistory: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   products: Product[];
 }
@@ -31,7 +30,6 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
 
   useEffect(scrollToBottom, [chatHistory]);
 
-  // Initial greeting from AI
   useEffect(() => {
     if (isOpen && chatHistory.length === 0) {
       setChatHistory([{
@@ -48,20 +46,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
 
     const newUserMessage: ChatMessage = { role: 'user', parts: [{ text: userInput }], id: `user-${Date.now()}` };
     setChatHistory(prev => [...prev, newUserMessage]);
+    const currentInput = userInput;
     setUserInput('');
     setIsLoading(true);
 
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
-        const fullChatHistory = [
+        const historyForAPI = [
             ...chatHistory, 
-            newUserMessage
+            { role: 'user', parts: [{ text: currentInput }], id: '' } // Use current input for the API call
         ];
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: fullChatHistory.map(msg => ({ role: msg.role, parts: msg.parts })),
+            contents: historyForAPI.map(msg => ({ role: msg.role, parts: msg.parts })),
             config: {
                 systemInstruction: systemInstruction,
             },
@@ -88,7 +87,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed bottom-24 right-6 lg:bottom-28 lg:right-10 z-40 w-[calc(100vw-3rem)] max-w-sm h-[60vh] bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-2xl flex flex-col border border-[var(--border-color)]"
         >
-          <header className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+          <header className="flex items-center justify-between p-4 border-b border-[var(--border-color)] flex-shrink-0">
             <div className="flex items-center gap-2">
                 <SparklesIcon className="w-6 h-6 text-[var(--primary-accent)]" />
                 <h3 className="font-bold text-[var(--text-primary)]">AI Assistant</h3>
@@ -116,7 +115,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, setIsOpen, chatHistor
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--border-color)]">
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--border-color)] flex-shrink-0">
             <div className="relative">
               <input
                 type="text"

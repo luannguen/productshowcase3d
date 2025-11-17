@@ -4,7 +4,8 @@ import SearchBar from './SearchBar';
 import FilterPopover from './FilterPopover';
 import ThemeSwitcher from './ThemeSwitcher';
 import ViewSwitcher from './ViewSwitcher';
-import { CloseIcon, CommandIcon, ManageIcon, SparklesIcon } from './icons';
+// FIX: Added SettingsIcon to imports.
+import { CloseIcon, CommandIcon, ManageIcon, SparklesIcon, SettingsIcon } from './icons';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ interface MobileMenuProps {
   surpriseMe: () => void;
   openCommandPalette: () => void;
   openManageModal: () => void;
+  // FIX: Added missing openSettingsModal prop.
+  openSettingsModal: () => void;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -30,6 +33,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   surpriseMe,
   openCommandPalette,
   openManageModal,
+  openSettingsModal,
 }) => {
   const handleAction = (action: () => void) => {
     action();
@@ -87,6 +91,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     <button onClick={() => handleAction(surpriseMe)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><SparklesIcon className="w-5 h-5"/> Surprise Me</button>
                     <button onClick={() => handleAction(openCommandPalette)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><CommandIcon className="w-5 h-5"/> Command Palette</button>
                     <button onClick={() => handleAction(openManageModal)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><ManageIcon className="w-5 h-5"/> Manage Products</button>
+                    {/* FIX: Added Settings button. */}
+                    <button onClick={() => handleAction(openSettingsModal)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><SettingsIcon className="w-5 h-5"/> Settings</button>
                 </div>
               </div>
             </div>

@@ -57,13 +57,14 @@ const FilterControls: React.FC<FilterPopoverProps> = ({
                     <div className="flex justify-between text-sm font-semibold text-[var(--text-primary)] mt-2 tabular-nums"><span>${priceRange.min}</span><span>${priceRange.max}</span></div>
                     <div className="mt-2 relative h-5 flex items-center">
                         <div className="absolute w-full h-1 bg-[var(--background-tertiary)] rounded-full"><div className="absolute h-1 bg-[var(--primary-accent)] rounded-full" style={{ left: `${minPos}%`, right: `${100 - maxPos}%` }} /></div>
-                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => { const newMin = Number(e.target.value); setPriceRange({ min: newMin, max: Math.max(newMin, priceRange.max) }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Minimum price" />
-                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => { const newMax = Number(e.target.value); setPriceRange({ max: newMax, min: Math.min(newMax, priceRange.min) }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Maximum price" />
+                        {/* FIX: Correct slider logic */}
+                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => { const newMin = Number(e.target.value); if (newMin <= priceRange.max) setPriceRange({ ...priceRange, min: newMin }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Minimum price" />
+                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => { const newMax = Number(e.target.value); if (newMax >= priceRange.min) setPriceRange({ ...priceRange, max: newMax }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Maximum price" />
                     </div>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)]">Category</label>
-                    <div className="mt-2 flex flex-wrap gap-2">{categories.map(category => (<button key={category} onClick={() => handleCategoryToggle(category)} className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${selectedCategories.includes(category) ? 'bg-[var(--primary-accent)] text-white' : 'bg-[var(--background-tertiary)] hover:bg-[var(--border-color)] text-[var(--text-primary)]'}`}>{category}</button>))}</div>
+                    <div className="mt-2 flex flex-wrap gap-2">{categories.map(category => (<button key={category} onClick={() => handleCategoryToggle(category)} className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${selectedCategories.includes(category) ? 'bg-[var(--primary-accent)] text-[var(--badge-text-color)]' : 'bg-[var(--background-tertiary)] hover:bg-[var(--border-color)] text-[var(--text-primary)]'}`}>{category}</button>))}</div>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)]">Sort By</label>
@@ -97,7 +98,7 @@ const FilterPopover: React.FC<FilterPopoverProps> = (props) => {
     <div className="relative" ref={popoverRef}>
       <button onClick={() => setIsOpen(!isOpen)} className="relative p-2 rounded-[var(--border-radius)] bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--primary-accent)] hover:text-white transition-all duration-300 flex items-center gap-2" aria-expanded={isOpen}>
         <FilterIcon className="w-5 h-5" /> Filter
-        {activeFilterCount > 0 && <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] ring-2 ring-[var(--background-primary)]">{activeFilterCount}</span>}
+        {activeFilterCount > 0 && <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-[var(--badge-text-color)] text-[10px] ring-2 ring-[var(--background-primary)]">{activeFilterCount}</span>}
       </button>
 
       <AnimatePresence>

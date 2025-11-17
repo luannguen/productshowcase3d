@@ -6,6 +6,8 @@ interface BaseCardProps {
   children: React.ReactNode;
   onClick: () => void;
   id?: string;
+  // FIX: Add reduceMotion prop to handle accessibility settings.
+  reduceMotion?: boolean;
 }
 
 const itemVariants: Variants = {
@@ -18,7 +20,7 @@ const itemVariants: Variants = {
   },
 };
 
-const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id }) => {
+const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id, reduceMotion }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -28,6 +30,7 @@ const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id }) => {
   const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (reduceMotion) return;
     const rect = ref.current?.getBoundingClientRect();
     if (rect) {
       const { width, height, left, top } = rect;
@@ -53,14 +56,14 @@ const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      style={{
+      style={!reduceMotion ? {
         transformStyle: 'preserve-3d',
         perspective: '1000px',
         rotateX,
         rotateY,
-      }}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
+      } : {}}
+      whileHover={reduceMotion ? {} : { scale: 1.03 }}
+      whileTap={reduceMotion ? {} : { scale: 0.97 }}
       className="cursor-pointer"
     >
       <div className="shine-effect" style={{ transformStyle: 'preserve-3d' }}>
