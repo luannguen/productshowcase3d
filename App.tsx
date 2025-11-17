@@ -1,22 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption } from './types';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense, useRef } from 'react';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
+import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption, QuickViewProduct, WishlistItem, RecentlyViewedItem, ChatMessage } from './types';
 import { themes } from './constants';
-import ViewSwitcher from './components/ViewSwitcher';
-import GridView from './components/GridView';
-import ListView from './components/ListView';
-import TableView from './components/TableView';
-import FlipView from './components/FlipView';
-import CarouselView from './components/CarouselView';
-import ThreeDView from './components/ThreeDView';
 import ThemeSwitcher from './components/ThemeSwitcher';
-import StoryView from './components/StoryView';
-import ProductManagementModal from './components/ProductManagementModal';
-import PurchaseModal from './components/PurchaseModal';
-import { ManageIcon, CartIcon, CommandIcon, SparklesIcon } from './components/icons';
+import { ManageIcon, CartIcon, CommandIcon, SparklesIcon, MenuIcon, HeartIcon, MessageSquareIcon } from './components/icons';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import SearchBar from './components/SearchBar';
-import FilterPopover from './components/FilterPopover';
 import ProductDetailModal from './components/ProductDetailModal';
 import CartModal from './components/CartModal';
 import ToastContainer from './components/Toast';
@@ -24,21 +13,51 @@ import CommandPalette from './components/CommandPalette';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import Tooltip from './components/Tooltip';
 import AccessibilityAnnouncer from './components/AccessibilityAnnouncer';
-import CustomCursor from './components/CustomCursor';
+import MobileMenu from './components/MobileMenu';
+import PurchaseModal from './components/PurchaseModal';
+import ProductManagementModal from './components/ProductManagementModal';
+
+// New Component Imports
+import FilterSidebar from './components/FilterSidebar';
+import RecentlyViewed from './components/RecentlyViewed';
+import AIAssistant from './components/AIAssistant';
+import WishlistModal from './components/WishlistModal';
+import QuickViewModal from './components/QuickViewModal';
+
+// Lazy load views for Code Splitting
+const GridView = lazy(() => import('./components/GridView'));
+const ListView = lazy(() => import('./components/ListView'));
+const TableView = lazy(() => import('./components/TableView'));
+const FlipView = lazy(() => import('./components/FlipView'));
+const CarouselView = lazy(() => import('./components/CarouselView'));
+const ThreeDView = lazy(() => import('./components/ThreeDView'));
+const StoryView = lazy(() => import('./components/StoryView'));
+const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
+
+// Debounce Hook
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+};
+
+const ITEMS_PER_PAGE = 8;
 
 const App: React.FC = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    return (localStorage.getItem('viewMode') as ViewMode) || ViewMode.Flip;
-  });
+  const [viewMode, setViewMode] = useState<ViewMode>(() => (localStorage.getItem('viewMode') as ViewMode) || ViewMode.Grid);
   const [appThemes, setAppThemes] = useState(themes);
-  const [activeTheme, setActiveTheme] = useState<Theme>(() => {
-      return (localStorage.getItem('theme') as Theme) || Theme.Electronics;
-  });
+  const [activeTheme, setActiveTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || Theme.Electronics);
   
   const [isManageModalOpen, setManageModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
-  const [isLoadingView, setIsLoadingView] = useState(true); // Start true for initial load
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartModalOpen, setCartModalOpen] = useState(false);
@@ -46,28 +65,38 @@ const App: React.FC = () => {
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [announcerMessage, setAnnouncerMessage] = useState('');
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // New state for filters
+  // State for new features
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [isWishlistOpen, setWishlistOpen] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct>(null);
+  const [isAIAssistantOpen, setAIAssistantOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [visibleProductsCount, setVisibleProductsCount] = useState(ITEMS_PER_PAGE);
+
+  // Filter state
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>('default');
 
   const currentThemeData = appThemes[activeTheme];
   const PRODUCTS = currentThemeData.products;
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const cartIconControls = useAnimationControls();
 
-  // Persist user preferences to localStorage
-  useEffect(() => {
-    localStorage.setItem('viewMode', viewMode);
-  }, [viewMode]);
+  // Persist preferences
+  useEffect(() => { localStorage.setItem('viewMode', viewMode); }, [viewMode]);
+  useEffect(() => { localStorage.setItem('theme', activeTheme); }, [activeTheme]);
 
-  useEffect(() => {
-    localStorage.setItem('theme', activeTheme);
-  }, [activeTheme]);
-
-  // Handle dynamic background class
+  // Dynamic theme styles
   useEffect(() => {
     document.body.classList.add('gradient-bg');
     const style = document.createElement('style');
     style.innerHTML = `
+      body {
+        transition: background-color var(--theme-transition-duration), color var(--theme-transition-duration);
+      }
       body.gradient-bg {
         --bg-gradient-1: ${currentThemeData.styles['--bg-gradient-1']};
         --bg-gradient-2: ${currentThemeData.styles['--bg-gradient-2']};
@@ -79,9 +108,7 @@ const App: React.FC = () => {
       }
     `;
     document.head.appendChild(style);
-    return () => {
-        document.head.removeChild(style);
-    };
+    return () => { document.head.removeChild(style); };
   }, [activeTheme, currentThemeData.styles]);
 
   // Keyboard shortcuts and scroll listener
@@ -92,15 +119,7 @@ const App: React.FC = () => {
             setCommandPaletteOpen(isOpen => !isOpen);
         }
     };
-
-    const handleScroll = () => {
-        if (window.scrollY > 300) {
-            setShowScrollToTop(true);
-        } else {
-            setShowScrollToTop(false);
-        }
-    };
-
+    const handleScroll = () => setShowScrollToTop(window.scrollY > 300);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('scroll', handleScroll);
     return () => {
@@ -109,184 +128,103 @@ const App: React.FC = () => {
     };
   }, []);
   
-  // Initial load effect
-  useEffect(() => {
-      setTimeout(() => setIsLoadingView(false), 500);
-  }, []);
-
-  const maxPrice = useMemo(() => 
-    Math.ceil(Math.max(...PRODUCTS.map(p => p.price), 0) / 100) * 100
-  , [PRODUCTS]);
-  
+  const maxPrice = useMemo(() => Math.ceil(Math.max(...PRODUCTS.map(p => p.price), 0) / 100) * 100, [PRODUCTS]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: maxPrice });
 
-  // Reset filters on theme change
-  useEffect(() => {
+  const resetFilters = useCallback(() => {
     setPriceRange({ min: 0, max: maxPrice });
-    setSearchQuery('');
     setSelectedCategories([]);
     setSortOption('default');
-  }, [activeTheme, maxPrice]);
+  }, [maxPrice]);
   
-  const allCategories = useMemo(() => 
-    [...new Set(PRODUCTS.map(p => p.category))].sort()
-  , [PRODUCTS]);
+  useEffect(() => {
+    resetFilters();
+    setSearchQuery('');
+    setVisibleProductsCount(ITEMS_PER_PAGE);
+  }, [activeTheme, maxPrice, resetFilters]);
+  
+  const allCategories = useMemo(() => [...new Set(PRODUCTS.map(p => p.category))].sort(), [PRODUCTS]);
 
   const filteredProducts = useMemo(() => {
-    let processedProducts = [...PRODUCTS];
-
-    // 1. Filter
-    processedProducts = processedProducts.filter(product => {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description.toLowerCase().includes(searchLower);
-      
-      const matchesPrice =
-        product.price >= priceRange.min && product.price <= priceRange.max;
-        
-      const matchesCategory =
-        selectedCategories.length === 0 || selectedCategories.includes(product.category);
-
-      return matchesSearch && matchesPrice && matchesCategory;
+    let processed = [...PRODUCTS].filter(p => {
+      const searchLower = debouncedSearchQuery.toLowerCase();
+      return (p.name.toLowerCase().includes(searchLower) || p.description.toLowerCase().includes(searchLower)) &&
+             (p.price >= priceRange.min && p.price <= priceRange.max) &&
+             (selectedCategories.length === 0 || selectedCategories.includes(p.category));
     });
 
-    // 2. Sort
     switch (sortOption) {
-        case 'name-asc':
-            processedProducts.sort((a, b) => a.name.localeCompare(b.name));
-            break;
-        case 'name-desc':
-            processedProducts.sort((a, b) => b.name.localeCompare(a.name));
-            break;
-        case 'price-asc':
-            processedProducts.sort((a, b) => a.price - b.price);
-            break;
-        case 'price-desc':
-            processedProducts.sort((a, b) => b.price - a.price);
-            break;
-        default:
-            // No sort or sort by ID
-            break;
+      case 'name-asc': processed.sort((a, b) => a.name.localeCompare(b.name)); break;
+      case 'name-desc': processed.sort((a, b) => b.name.localeCompare(a.name)); break;
+      case 'price-asc': processed.sort((a, b) => a.price - b.price); break;
+      case 'price-desc': processed.sort((a, b) => b.price - a.price); break;
     }
+    return processed;
+  }, [PRODUCTS, debouncedSearchQuery, priceRange, selectedCategories, sortOption]);
 
-    return processedProducts;
-  }, [PRODUCTS, searchQuery, priceRange, selectedCategories, sortOption]);
+  const paginatedProducts = useMemo(() => filteredProducts.slice(0, visibleProductsCount), [filteredProducts, visibleProductsCount]);
 
-  // Accessibility Announcer Effect
   useEffect(() => {
-    if (filteredProducts.length > 0) {
-        setAnnouncerMessage(`Showing ${filteredProducts.length} products.`);
-    } else {
-        setAnnouncerMessage('No products found.');
-    }
-  }, [filteredProducts]);
-  
-  const handleSetView = useCallback((newView: ViewMode) => {
-    if (newView !== viewMode) {
-      setIsLoadingView(true);
-      setViewMode(newView);
-      setTimeout(() => setIsLoadingView(false), 500);
-    }
-  }, [viewMode]);
-  
-  const addToast = (message: string) => {
-    const newToast: ToastMessage = { id: Date.now(), message };
-    setToasts(prevToasts => [...prevToasts, newToast]);
-  };
+      setAnnouncerMessage(debouncedSearchQuery ? `Showing ${filteredProducts.length} products.` : '');
+  }, [filteredProducts.length, debouncedSearchQuery]);
 
-  const removeToast = (id: number) => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-  };
+  const handleSetView = useCallback((newView: ViewMode) => setViewMode(newView), []);
+  
+  const addToast = (message: string) => setToasts(prev => [...prev, { id: Date.now(), message }]);
+  const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
   const handleAddToCart = useCallback((product: Product, quantity: number = 1) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.product.id === product.id);
-      if (existingItem) {
-        return prevCart.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
       }
-      return [...prevCart, { product, quantity }];
+      return [...prev, { product, quantity }];
     });
     addToast(`${product.name} added to cart!`);
-  }, []);
+    cartIconControls.start({ scale: [1, 1.3, 1], rotate: [0, -10, 10, 0], transition: { duration: 0.5 } });
+  }, [cartIconControls]);
   
-  const handleUpdateCartQuantity = (productId: number, newQuantity: number) => {
-    setCart(prevCart => {
-        if (newQuantity <= 0) {
-            return prevCart.filter(item => item.product.id !== productId);
-        }
-        return prevCart.map(item =>
-            item.product.id === productId ? { ...item, quantity: newQuantity } : item
-        );
-    });
-  };
-
-  const handleRemoveFromCart = (productId: number) => {
-    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
-  };
-  
+  const handleUpdateCartQuantity = (id: number, newQty: number) => setCart(p => newQty <= 0 ? p.filter(i => i.product.id !== id) : p.map(i => i.product.id === id ? { ...i, quantity: newQty } : i));
+  const handleRemoveFromCart = (id: number) => setCart(p => p.filter(i => i.product.id !== id));
   const handleClearCart = () => setCart([]);
-  
-  const handleCheckout = () => {
-    setCartModalOpen(false);
-    setPurchaseModalOpen(true);
-  };
+  const handleCheckout = () => { setCartModalOpen(false); setPurchaseModalOpen(true); };
+  const handlePurchaseSuccess = () => { addToast("Purchase successful!"); setPurchaseModalOpen(false); handleClearCart(); };
 
-  const handlePurchaseSuccess = () => {
-    addToast("Purchase successful! Thank you.");
-    setPurchaseModalOpen(false);
-    handleClearCart();
-  };
+  const handleUpdateProductImage = (id: number, url: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, imageUrl: url } : p) } }));
+  const handleUpdateProductDescription = (id: number, desc: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, description: desc } : p) } }));
 
-  const handleUpdateProductImage = (productId: number, newImageUrl: string) => {
-    setAppThemes(currentThemes => {
-        const updatedProducts = currentThemes[activeTheme].products.map(p =>
-            p.id === productId ? { ...p, imageUrl: newImageUrl } : p
-        );
-        return {
-            ...currentThemes,
-            [activeTheme]: { ...currentThemes[activeTheme], products: updatedProducts }
-        };
-    });
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setRecentlyViewed(prev => [product, ...prev.filter(p => p.id !== product.id)].slice(0, 10));
   };
   
-  const handleUpdateProductDescription = (productId: number, newDescription: string) => {
-    setAppThemes(currentThemes => {
-        const updatedProducts = currentThemes[activeTheme].products.map(p =>
-            p.id === productId ? { ...p, description: newDescription } : p
-        );
-        return {
-            ...currentThemes,
-            [activeTheme]: { ...currentThemes[activeTheme], products: updatedProducts }
-        };
-    });
-  };
-
-  const handleProductClick = (product: Product) => setSelectedProduct(product);
-  const handleCloseDetailModal = () => setSelectedProduct(null);
+  const handleQuickView = (product: Product) => setQuickViewProduct(product);
   
-  const surpriseMe = () => {
-      const randomIndex = Math.floor(Math.random() * PRODUCTS.length);
-      handleProductClick(PRODUCTS[randomIndex]);
+  const handleBuyNow = (product: Product, quantity: number) => {
+    handleAddToCart(product, quantity);
+    setSelectedProduct(null);
+    setQuickViewProduct(null);
+    handleCheckout();
   };
-
-  const cartItemCount = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
   
-  const isModalOpen = isManageModalOpen || isPurchaseModalOpen || selectedProduct !== null || isCartModalOpen || isCommandPaletteOpen;
+  const surpriseMe = () => handleProductClick(PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)]);
+
+  const handleToggleWishlist = (product: Product) => {
+    setWishlist(prev => prev.find(p => p.id === product.id) ? prev.filter(p => p.id !== product.id) : [...prev, product]);
+  };
+  const isProductInWishlist = (id: number) => wishlist.some(p => p.id === id);
+
+  const cartItemCount = useMemo(() => cart.reduce((t, i) => t + i.quantity, 0), [cart]);
+  
+  const isAnyModalOpen = isManageModalOpen || isPurchaseModalOpen || !!selectedProduct || isCartModalOpen || isCommandPaletteOpen || isMobileMenuOpen || !!quickViewProduct || isWishlistOpen;
   
   useEffect(() => {
-    const body = document.body;
-    if (isModalOpen) { body.style.overflow = 'hidden'; }
-    else { body.style.overflow = 'auto'; }
-  }, [isModalOpen]);
+    document.body.style.overflow = isAnyModalOpen ? 'hidden' : 'auto';
+  }, [isAnyModalOpen]);
 
   const renderView = () => {
-    if (isLoadingView) return <LoadingSkeleton viewMode={viewMode} />;
-    if (filteredProducts.length === 0) {
+    if (paginatedProducts.length === 0 && debouncedSearchQuery) {
         return (
           <div className="text-center py-20 bg-[var(--background-secondary)] rounded-[var(--border-radius)]">
             <h2 className="text-2xl font-bold text-[var(--text-primary)]">No Products Found</h2>
@@ -294,97 +232,122 @@ const App: React.FC = () => {
           </div>
         );
     }
-    const baseProps = { products: filteredProducts, onProductClick: handleProductClick, onAddToCart: handleAddToCart };
-    const viewPropsWithSearch = { ...baseProps, searchQuery };
+    const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist };
+    const viewProps = { ...baseProps, products: paginatedProducts };
+    const viewPropsWithSearch = { ...viewProps, searchQuery: debouncedSearchQuery };
 
     switch (viewMode) {
       case ViewMode.Grid: return <GridView {...viewPropsWithSearch} />;
       case ViewMode.List: return <ListView {...viewPropsWithSearch} />;
-      case ViewMode.Table: return <TableView products={filteredProducts} onProductClick={handleProductClick} />;
-      case ViewMode.Flip: return <FlipView {...baseProps} />;
-      case ViewMode.Carousel: return <CarouselView {...baseProps} />;
+      case ViewMode.Table: return <TableView products={paginatedProducts} onProductClick={handleProductClick} />;
+      case ViewMode.Flip: return <FlipView {...viewProps} />;
+      case ViewMode.Carousel: return <CarouselView {...viewProps} />;
       case ViewMode.ThreeD: return <ThreeDView themeStyles={currentThemeData.styles} />;
-      case ViewMode.Story: return <StoryView products={filteredProducts.filter(p => p.story)} onAddToCart={handleAddToCart} onProductClick={handleProductClick} />;
+      case ViewMode.Story: return <StoryView {...baseProps} products={paginatedProducts.filter(p => p.story)} />;
       default: return <GridView {...viewPropsWithSearch} />;
     }
   };
+  
+  const filterProps = { priceRange, setPriceRange, maxPrice, categories: allCategories, selectedCategories, setSelectedCategories, sortOption, setSortOption, resetFilters };
 
   return (
-    <div 
-        style={currentThemeData.styles}
-        className={`min-h-screen bg-transparent text-[var(--text-primary)] font-sans transition-colors duration-500`}
-    >
-      <CustomCursor />
+    <div style={currentThemeData.styles} className="min-h-screen bg-transparent text-[var(--text-primary)] font-sans">
       <AccessibilityAnnouncer message={announcerMessage} />
-      <div className={`main-content-wrapper ${isModalOpen ? 'modal-open-blur' : ''}`}>
+      <div className={`main-content-wrapper ${isAnyModalOpen ? 'modal-open-blur' : ''}`}>
         <header className="glass-header sticky top-0 z-20 shadow-lg border-b border-white/10">
           <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] order-1">
-              Showcase
-            </h1>
-            
-            <div className="flex-grow flex items-center justify-center gap-4 order-3 lg:order-2 w-full lg:w-auto">
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] order-1">Showcase</h1>
+            <div className="hidden lg:flex flex-grow items-center justify-center gap-4 order-2">
                 <SearchBar value={searchQuery} onChange={setSearchQuery} />
-                <FilterPopover 
-                    priceRange={priceRange}
-                    setPriceRange={setPriceRange}
-                    maxPrice={maxPrice}
-                    categories={allCategories}
-                    selectedCategories={selectedCategories}
-                    setSelectedCategories={setSelectedCategories}
-                    sortOption={sortOption}
-                    setSortOption={setSortOption}
-                />
             </div>
-
-            <div className="flex items-center gap-2 sm:gap-2 order-2 lg:order-3">
-              <ThemeSwitcher currentTheme={activeTheme} setTheme={setActiveTheme} />
-              <ViewSwitcher currentView={viewMode} setView={handleSetView} />
+            <div className="hidden lg:flex items-center gap-2 order-3">
+              <Suspense fallback={<div className="w-48 h-10 bg-gray-700 rounded-md" />}>
+                <ThemeSwitcher currentTheme={activeTheme} setTheme={setActiveTheme} />
+              </Suspense>
+              <Suspense fallback={<div className="w-96 h-10 bg-gray-700 rounded-md" />}>
+                <ViewSwitcher currentView={viewMode} setView={handleSetView} />
+              </Suspense>
               <div className="flex items-center bg-[var(--background-tertiary)] rounded-[var(--border-radius)] p-1">
-                <Tooltip text="Surprise Me!">
-                  <motion.button whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }} onClick={surpriseMe} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Select a random product"><SparklesIcon className="w-5 h-5" /></motion.button>
-                </Tooltip>
-                <Tooltip text="Command Palette (Ctrl+K)">
-                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCommandPaletteOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Open command palette"><CommandIcon className="w-5 h-5" /></motion.button>
-                </Tooltip>
-                 <Tooltip text={`Shopping Cart (${cartItemCount} items)`}>
-                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCartModalOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label={`Open shopping cart`}>
-                     <CartIcon className="w-5 h-5" />
-                     {cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold ring-2 ring-[var(--background-primary)]">{cartItemCount}</span>)}
-                   </motion.button>
-                 </Tooltip>
-                 <Tooltip text="Manage Products">
-                   <motion.button whileHover={{ scale: 1.1, rotate: -5 }} whileTap={{ scale: 0.9 }} onClick={() => setManageModalOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)] transition-colors" aria-label="Manage Products"><ManageIcon className="w-5 h-5" /></motion.button>
-                 </Tooltip>
+                <Tooltip text="Surprise Me!"><motion.button whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }} onClick={surpriseMe} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]" aria-label="Surprise Me"><SparklesIcon className="w-5 h-5" /></motion.button></Tooltip>
+                <Tooltip text="Command Palette (Ctrl+K)"><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCommandPaletteOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]" aria-label="Command Palette"><CommandIcon className="w-5 h-5" /></motion.button></Tooltip>
+                <Tooltip text="Manage Products"><motion.button whileHover={{ scale: 1.1, rotate: -5 }} whileTap={{ scale: 0.9 }} onClick={() => setManageModalOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]" aria-label="Manage Products"><ManageIcon className="w-5 h-5" /></motion.button></Tooltip>
               </div>
+            </div>
+            <div className="flex items-center gap-4 order-2 lg:hidden">
+                <Tooltip text={`Wishlist (${wishlist.length})`}><motion.button onClick={() => setWishlistOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><HeartIcon className="w-6 h-6" /></motion.button></Tooltip>
+                <Tooltip text={`Cart (${cartItemCount})`}><motion.button animate={cartIconControls} onClick={() => setCartModalOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><CartIcon className="w-6 h-6" />{cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{cartItemCount}</span>)}</motion.button></Tooltip>
+                <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]" aria-label="Open menu"><MenuIcon className="w-6 h-6" /></button>
+            </div>
+            <div className="hidden lg:flex items-center gap-3 order-4">
+                <Tooltip text={`Wishlist (${wishlist.length})`}><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setWishlistOpen(true)} className="relative p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><HeartIcon className="w-5 h-5" />{wishlist.length > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{wishlist.length}</span>)}</motion.button></Tooltip>
+                <Tooltip text={`Cart (${cartItemCount})`}><motion.button animate={cartIconControls} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCartModalOpen(true)} className="relative p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><CartIcon className="w-5 h-5" />{cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{cartItemCount}</span>)}</motion.button></Tooltip>
             </div>
           </div>
         </header>
+        
         <main className="container mx-auto px-4 py-8">
-           <AnimatePresence mode="wait">
-              <motion.div
-                key={viewMode}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                {renderView()}
-              </motion.div>
-            </AnimatePresence>
+            <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+                <FilterSidebar {...filterProps} className="hidden lg:block" />
+                <div className="lg:col-span-3">
+                    <Suspense fallback={<LoadingSkeleton viewMode={viewMode} />}>
+                        <AnimatePresence mode="wait">
+                            <motion.div key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                                {renderView()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </Suspense>
+                    {visibleProductsCount < filteredProducts.length && (
+                        <div className="mt-8 text-center">
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setVisibleProductsCount(c => c + ITEMS_PER_PAGE)} className="px-6 py-3 bg-[var(--primary-accent)] text-white font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors">
+                                Load More
+                            </motion.button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </main>
-        <footer className="text-center py-6 text-[var(--text-secondary)] text-sm">
-          <p>Built with React, TypeScript, and Framer Motion. Themed for your delight.</p>
+        
+        <RecentlyViewed products={recentlyViewed} onProductClick={handleProductClick} />
+        
+        <footer className="text-center py-10 mt-10 border-t border-[var(--border-color)]">
+            <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                <div>
+                    <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)]">Showcase</h3>
+                    <p className="mt-2 text-sm text-[var(--text-secondary)]">The ultimate product viewing experience.</p>
+                </div>
+                <div>
+                    <h4 className="font-semibold text-[var(--text-primary)]">Quick Links</h4>
+                    <ul className="mt-2 space-y-1 text-sm text-[var(--text-secondary)]">
+                        <li><a href="#" className="hover:text-[var(--primary-accent)]">About Us</a></li>
+                        <li><a href="#" className="hover:text-[var(--primary-accent)]">Contact</a></li>
+                        <li><a href="#" className="hover:text-[var(--primary-accent)]">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold text-[var(--text-primary)]">Follow Us</h4>
+                     <p className="mt-2 text-sm text-[var(--text-secondary)]">Join our community on social media.</p>
+                </div>
+            </div>
+             <p className="mt-8 text-xs text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} Showcase. All rights reserved.</p>
         </footer>
       </div>
 
-      <ToastContainer toasts={toasts} removeToast={removeToast}/>
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterPopoverProps={filterProps} themeSwitcherProps={{ currentTheme: activeTheme, setTheme: setActiveTheme }} viewSwitcherProps={{ currentView: viewMode, setView: handleSetView }} surpriseMe={surpriseMe} openCommandPalette={() => setCommandPaletteOpen(true)} openManageModal={() => setManageModalOpen(true)} />
+      
+      {/* Modals */}
       <ProductManagementModal isOpen={isManageModalOpen} onClose={() => setManageModalOpen(false)} products={PRODUCTS} onUpdateImage={handleUpdateProductImage} onUpdateDescription={handleUpdateProductDescription} />
-      <ProductDetailModal isOpen={selectedProduct !== null} product={selectedProduct} onClose={handleCloseDetailModal} onAddToCart={handleAddToCart} />
+      <ProductDetailModal isOpen={!!selectedProduct} product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
       <CartModal isOpen={isCartModalOpen} onClose={() => setCartModalOpen(false)} cartItems={cart} onUpdateQuantity={handleUpdateCartQuantity} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} onCheckout={handleCheckout} />
       <PurchaseModal isOpen={isPurchaseModalOpen} cart={cart} onClose={() => setPurchaseModalOpen(false)} onPurchaseSuccess={handlePurchaseSuccess} />
       <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} setView={handleSetView} setTheme={setActiveTheme} />
+      <WishlistModal isOpen={isWishlistOpen} onClose={() => setWishlistOpen(false)} wishlistItems={wishlist} onRemoveFromWishlist={handleToggleWishlist} onAddToCart={handleAddToCart} />
+      <QuickViewModal isOpen={!!quickViewProduct} product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={handleAddToCart} onNavigateToProduct={handleProductClick} />
+
+      <AIAssistant isOpen={isAIAssistantOpen} setIsOpen={setAIAssistantOpen} chatHistory={chatHistory} setChatHistory={setChatHistory} products={PRODUCTS}/>
+      <button onClick={() => setAIAssistantOpen(true)} className="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-30 p-4 bg-[var(--primary-accent)] text-white rounded-full shadow-lg hover:bg-[var(--primary-accent-hover)] transition-all transform hover:scale-110" aria-label="Open AI Assistant"><MessageSquareIcon className="w-8 h-8" /></button>
+      
       <ScrollToTopButton isVisible={showScrollToTop} />
     </div>
   );

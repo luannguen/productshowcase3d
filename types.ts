@@ -49,3 +49,13 @@ export enum Theme {
 }
 
 export type SortOption = 'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc';
+
+// New types for 20 enhancements
+export type QuickViewProduct = Product | null;
+export type WishlistItem = Product;
+export type RecentlyViewedItem = Product;
+export type ChatMessage = { 
+  role: 'user' | 'model'; 
+  parts: { text: string }[]; 
+  id: string; 
+};

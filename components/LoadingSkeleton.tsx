@@ -5,14 +5,16 @@ interface LoadingSkeletonProps {
   viewMode: ViewMode;
 }
 
+const Shimmer: React.FC = () => <div className="shimmer-wave"></div>;
+
 const SkeletonCard: React.FC = () => (
   <div className="bg-[var(--background-secondary)] rounded-[var(--border-radius)] overflow-hidden shadow-lg flex flex-col">
-    <div className="w-full h-48 skeleton" />
+    <div className="w-full h-48 skeleton"><Shimmer/></div>
     <div className="p-4 flex flex-col flex-grow">
-      <div className="h-6 w-3/4 skeleton rounded" />
+      <div className="h-6 w-3/4 skeleton rounded"><Shimmer/></div>
       <div className="mt-4 flex justify-between items-center">
-        <div className="h-8 w-1/3 skeleton rounded" />
-        <div className="w-10 h-10 skeleton rounded-[var(--border-radius)]" />
+        <div className="h-8 w-1/3 skeleton rounded"><Shimmer/></div>
+        <div className="w-10 h-10 skeleton rounded-[var(--border-radius)]"><Shimmer/></div>
       </div>
     </div>
   </div>
@@ -20,33 +22,25 @@ const SkeletonCard: React.FC = () => (
 
 const SkeletonListItem: React.FC = () => (
   <div className="flex flex-col sm:flex-row items-center bg-[var(--background-secondary)] rounded-[var(--border-radius)] shadow-md overflow-hidden p-4">
-    <div className="w-full sm:w-48 h-48 sm:h-32 skeleton rounded-md flex-shrink-0" />
+    <div className="w-full sm:w-48 h-48 sm:h-32 skeleton rounded-md flex-shrink-0"><Shimmer/></div>
     <div className="sm:ml-6 mt-4 sm:mt-0 flex-1 w-full">
-      <div className="h-8 w-1/2 skeleton rounded" />
-      <div className="h-5 w-full mt-4 skeleton rounded" />
-      <div className="h-5 w-3/4 mt-2 skeleton rounded" />
+      <div className="h-8 w-1/2 skeleton rounded"><Shimmer/></div>
+      <div className="h-5 w-full mt-4 skeleton rounded"><Shimmer/></div>
+      <div className="h-5 w-3/4 mt-2 skeleton rounded"><Shimmer/></div>
     </div>
     <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-right flex-shrink-0">
-       <div className="h-9 w-28 skeleton rounded" />
-       <div className="h-10 w-32 mt-3 skeleton rounded-[var(--border-radius)]" />
+       <div className="h-9 w-28 skeleton rounded"><Shimmer/></div>
+       <div className="h-10 w-32 mt-3 skeleton rounded-[var(--border-radius)]"><Shimmer/></div>
     </div>
   </div>
 );
 
 const SkeletonTableRow: React.FC = () => (
     <tr className="bg-[var(--background-secondary)] border-b border-[var(--border-color)]">
-        <td className="p-4">
-            <div className="w-16 h-16 skeleton rounded-md" />
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-5 w-32 skeleton rounded" />
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-5 w-56 skeleton rounded" />
-        </td>
-        <td className="px-6 py-4 text-right">
-            <div className="h-6 w-20 skeleton rounded ml-auto" />
-        </td>
+        <td className="p-4"><div className="w-16 h-16 skeleton rounded-md"><Shimmer/></div></td>
+        <td className="px-6 py-4"><div className="h-5 w-32 skeleton rounded"><Shimmer/></div></td>
+        <td className="px-6 py-4"><div className="h-5 w-56 skeleton rounded"><Shimmer/></div></td>
+        <td className="px-6 py-4 text-right"><div className="h-6 w-20 skeleton rounded ml-auto"><Shimmer/></div></td>
     </tr>
 );
 
