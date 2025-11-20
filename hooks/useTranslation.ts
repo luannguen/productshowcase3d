@@ -10,8 +10,6 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-// FIX: Changed component signature to be more explicit, resolving parser errors.
-// FIX: Replaced JSX syntax with React.createElement to avoid TypeScript parsing errors in a .ts file.
 export const TranslationProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [locale, setLocale] = useState<Locale>('en');
 
@@ -19,7 +17,6 @@ export const TranslationProvider = ({ children }: { children: React.ReactNode })
     let translation = translations[locale][key] || translations['en'][key] || key;
     if (replacements) {
         Object.entries(replacements).forEach(([placeholder, value]) => {
-            // Use a regex with the 'g' flag to replace all instances of the placeholder
             const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
             translation = translation.replace(regex, String(value));
         });

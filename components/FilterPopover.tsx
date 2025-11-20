@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FilterIcon } from './icons';
@@ -11,6 +12,9 @@ interface FilterPopoverProps {
   categories: string[];
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
+  colors?: string[];
+  selectedColors?: string[];
+  setSelectedColors?: (colors: string[]) => void;
   sortOption: SortOption;
   setSortOption: (option: SortOption) => void;
   resetFilters: () => void;
@@ -27,6 +31,7 @@ const sortOptions: { value: SortOption, label: string }[] = [
 const FilterControls: React.FC<FilterPopoverProps> = ({ 
     priceRange, setPriceRange, maxPrice, 
     categories, selectedCategories, setSelectedCategories,
+    colors, selectedColors, setSelectedColors,
     sortOption, setSortOption, resetFilters
 }) => {
     const minPos = (priceRange.min / maxPrice) * 100;
@@ -43,6 +48,7 @@ const FilterControls: React.FC<FilterPopoverProps> = ({
     const activeFilterCount =
         (priceRange.min > 0 || priceRange.max < maxPrice ? 1 : 0) +
         selectedCategories.length +
+        (selectedColors?.length || 0) +
         (sortOption !== 'default' ? 1 : 0);
         
     return (
@@ -58,15 +64,36 @@ const FilterControls: React.FC<FilterPopoverProps> = ({
                     <div className="flex justify-between text-sm font-semibold text-[var(--text-primary)] mt-2 tabular-nums"><span>${priceRange.min}</span><span>${priceRange.max}</span></div>
                     <div className="mt-2 relative h-5 flex items-center">
                         <div className="absolute w-full h-1 bg-[var(--background-tertiary)] rounded-full"><div className="absolute h-1 bg-[var(--primary-accent)] rounded-full" style={{ left: `${minPos}%`, right: `${100 - maxPos}%` }} /></div>
-                        {/* FIX: Correct slider logic */}
-                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => { const newMin = Number(e.target.value); if (newMin <= priceRange.max) setPriceRange({ ...priceRange, min: newMin }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Minimum price" />
-                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => { const newMax = Number(e.target.value); if (newMax >= priceRange.min) setPriceRange({ ...priceRange, max: newMax }); }} className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none" aria-label="Maximum price" />
+                        {/* FIX: Correct slider logic by removing pointer-events-none */}
+                        <input type="range" min="0" max={maxPrice} value={priceRange.min} onChange={(e) => { const newMin = Number(e.target.value); if (newMin <= priceRange.max) setPriceRange({ ...priceRange, min: newMin }); }} className="absolute w-full h-1 appearance-none bg-transparent" aria-label="Minimum price" />
+                        <input type="range" min="0" max={maxPrice} value={priceRange.max} onChange={(e) => { const newMax = Number(e.target.value); if (newMax >= priceRange.min) setPriceRange({ ...priceRange, max: newMax }); }} className="absolute w-full h-1 appearance-none bg-transparent" aria-label="Maximum price" />
                     </div>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)]">Category</label>
                     <div className="mt-2 flex flex-wrap gap-2">{categories.map(category => (<button key={category} onClick={() => handleCategoryToggle(category)} className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${selectedCategories.includes(category) ? 'bg-[var(--primary-accent)] text-[var(--badge-text-color)]' : 'bg-[var(--background-tertiary)] hover:bg-[var(--border-color)] text-[var(--text-primary)]'}`}>{category}</button>))}</div>
                 </div>
+                {/* FIX: Moved color filter UI here to make FilterControls reusable */}
+                {colors && selectedColors && setSelectedColors && (
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--text-secondary)]">Color</label>
+                        <div className="mt-2 flex flex-wrap gap-3">
+                            {colors.map(color => (
+                                <button 
+                                    key={color} 
+                                    onClick={() => setSelectedColors(
+                                        selectedColors.includes(color)
+                                            ? selectedColors.filter(c => c !== color)
+                                            : [...selectedColors, color]
+                                    )}
+                                    className={`color-swatch ${selectedColors.includes(color) ? 'selected' : ''}`}
+                                    style={{ backgroundColor: color }}
+                                    aria-label={`Filter by color ${color}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)]">Sort By</label>
                     <select value={sortOption} onChange={(e) => setSortOption(e.target.value as SortOption)} className="mt-2 w-full p-2 bg-[var(--background-tertiary)] text-[var(--text-primary)] rounded-[var(--border-radius)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-accent)]">
@@ -93,6 +120,7 @@ const FilterPopover: React.FC<FilterPopoverProps> = (props) => {
     const activeFilterCount =
         (props.priceRange.min > 0 || props.priceRange.max < props.maxPrice ? 1 : 0) +
         props.selectedCategories.length +
+        (props.selectedColors?.length || 0) +
         (props.sortOption !== 'default' ? 1 : 0);
 
   return (

@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ViewMode } from '../types';
-import { GridIcon, ListIcon, TableIcon, FlipIcon, CarouselIcon, ThreeDIcon, StoryIcon, UserIcon } from './icons';
+import { GridIcon, ListIcon, TableIcon, FlipIcon, CarouselIcon, ThreeDIcon, StoryIcon, UserIcon, BookOpenIcon } from './icons';
 import Tooltip from './Tooltip';
 
 interface ViewSwitcherProps {
@@ -19,13 +19,14 @@ const viewOptions = [
   { mode: ViewMode.Grid, Icon: GridIcon },
   { mode: ViewMode.List, Icon: ListIcon },
   { mode: ViewMode.Table, Icon: TableIcon },
+  { mode: ViewMode.ReadBook, Icon: BookOpenIcon },
 ];
 
 const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView, setView }) => {
   return (
     <div className="flex items-center bg-[var(--background-tertiary)] rounded-[var(--border-radius)] p-1 space-x-1">
       {viewOptions.map(({ mode, Icon }) => (
-        <Tooltip key={mode} text={`Switch to ${mode} View`}>
+        <Tooltip key={mode} text={`${mode} View`}>
           <motion.button
             onClick={() => setView(mode)}
             className={`relative flex items-center justify-center p-2 lg:px-3 lg:py-1.5 text-sm font-medium rounded-[var(--border-radius)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-tertiary)] focus:ring-[var(--primary-accent)] ${

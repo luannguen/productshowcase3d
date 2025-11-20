@@ -28,8 +28,9 @@ const viewIcons: Record<ViewMode, React.FC<{ className?: string }>> = {
     [ViewMode.Carousel]: Icons.CarouselIcon,
     [ViewMode.ThreeD]: Icons.ThreeDIcon,
     [ViewMode.Story]: Icons.StoryIcon,
-    // FIX: Added missing entry for 'ForYou' view mode to satisfy the Record type.
     [ViewMode.ForYou]: Icons.UserIcon,
+    // FIX: Add missing ReadBook view mode icon
+    [ViewMode.ReadBook]: Icons.BookOpenIcon,
 };
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setView, setTheme }) => {
@@ -42,7 +43,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setVie
       perform: () => setView(view),
     })),
     ...Object.values(Theme).map(theme => ({
-      id: `theme-${theme}`, name: `Change theme to ${theme}`, section: 'Themes', keywords: 'color style design', icon: <div className="w-5 h-5 rounded-full" style={{backgroundColor: themes[theme].styles['--primary-accent'] as string}} />,
+      id: `theme-${theme}`, name: `Change theme to ${theme}`, section: 'Themes', keywords: 'color style design', icon: <div className="w-5 h-5 rounded-full" style={{backgroundColor: themes[theme].styles.dark['--primary-accent'] as string}} />,
       perform: () => setTheme(theme),
     })),
   ];
@@ -108,7 +109,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, setVie
                 <div key={section}>
                   <h3 className="px-2 py-1 text-xs font-semibold text-[var(--text-tertiary)]">{section}</h3>
                   <ul>
-                    {filteredActions.filter(a => a.section === section).map((action, index) => {
+                    {filteredActions.filter(a => a.section === section).map((action) => {
                       const globalIndex = filteredActions.findIndex(a => a.id === action.id);
                       return (
                         <li key={action.id} data-selected={selectedIndex === globalIndex} onClick={() => { action.perform(); onClose(); }} className="command-palette-item flex items-center gap-3 p-2 rounded-md cursor-pointer">

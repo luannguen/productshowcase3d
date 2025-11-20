@@ -1,22 +1,18 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-// FIX: Import AnimatePresence, useMotionValue, and animate. Remove useAnimation.
 import { motion, AnimatePresence, PanInfo, useMotionValue, animate } from 'framer-motion';
 import { Product } from '../types';
 import { CartIcon } from './icons';
 
 interface StoryViewProps {
   products: Product[];
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product, quantity: number, event?: React.MouseEvent<HTMLButtonElement>) => void;
   onProductClick: (product: Product) => void;
-  // FIX: Added missing reduceMotion prop.
   reduceMotion: boolean;
 }
 
 const STORY_DURATION = 8000; // 8 seconds per story
 
-const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductClick }) => {
-    // FIX: Replace useAnimation with useMotionValue and a ref for animation controls.
+const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductClick, reduceMotion }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const width = useMotionValue("0%");
     const animationRef = useRef<any>(null);
@@ -52,7 +48,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                 animationRef.current.stop();
             }
         };
-    }, [goToStory]);
+    }, [goToStory, products]);
     
     const handlePointerDown = () => {
         isPaused.current = true;
@@ -64,7 +60,6 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
 
     const handlePointerUp = () => {
         isPaused.current = false;
-        // FIX: Use width motion value's get() method to calculate remaining duration.
         const currentWidthPercent = parseFloat(width.get().replace('%', ''));
         const remainingDuration = (1 - (currentWidthPercent / 100)) * STORY_DURATION;
 
@@ -80,9 +75,9 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
 
     const handleDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         if (info.offset.x > 50) {
-            goToStory(activeIndex - 1);
+            goToStory(Math.max(0, activeIndex - 1));
         } else if (info.offset.x < -50) {
-            goToStory(activeIndex + 1);
+            goToStory(Math.min(products.length - 1, activeIndex + 1));
         }
     };
 
@@ -104,7 +99,6 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                 {products.map((_, index) => (
                     <div key={index} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
                         {index < activeIndex && <div className="h-full w-full bg-[var(--primary-accent)]" />}
-                        {/* FIX: Use the motion value in the style prop to drive the animation. */}
                         {index === activeIndex && <motion.div className="h-full bg-[var(--primary-accent)]" style={{ width }} />}
                     </div>
                 ))}
@@ -125,7 +119,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                     onDragEnd={handleDragEnd}
                 >
                     <div className="absolute inset-0 z-0">
-                        {activeProduct.story?.videoUrl ? (
+                        {activeProduct.story?.videoUrl && !reduceMotion ? (
                             <video
                                 key={activeProduct.id}
                                 src={activeProduct.story.videoUrl}
@@ -136,7 +130,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                                 playsInline
                             />
                         ) : (
-                            <img src={activeProduct.story?.imageUrl} alt={`${activeProduct.name} story background`} className="w-full h-full object-cover animate-kenburns" />
+                            <img src={activeProduct.story?.imageUrl} alt={`${activeProduct.name} story background`} className={`w-full h-full object-cover ${!reduceMotion ? 'animate-kenburns' : ''}`} />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--background-secondary)] via-[var(--background-secondary)]/70 to-transparent"></div>
                     </div>
@@ -165,7 +159,7 @@ const StoryView: React.FC<StoryViewProps> = ({ products, onAddToCart, onProductC
                                     ${activeProduct.price.toFixed(2)}
                                 </p>
                                 <button 
-                                    onClick={() => onAddToCart(activeProduct)}
+                                    onClick={(e) => onAddToCart(activeProduct, 1, e)}
                                     className="px-6 py-3 bg-[var(--primary-accent)] text-white font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors duration-200 flex items-center gap-2 text-lg shadow-lg add-to-cart-animation"
                                     aria-label={`Add ${activeProduct.name} to cart`}
                                 >

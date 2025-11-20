@@ -1,7 +1,7 @@
 import React from 'react';
 import { Appearance, Theme, Locale } from '../types';
 import BaseModal from './BaseModal';
-import { SunIcon, MoonIcon, ElectronicsIcon, FashionIcon, YouthfulIcon, LanguagesIcon } from './icons';
+import { SunIcon, MoonIcon, ElectronicsIcon, FashionIcon, YouthfulIcon, LanguagesIcon, BookIcon } from './icons';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -26,18 +26,27 @@ const AppearanceControl: React.FC<Pick<SettingsModalProps, 'appearance' | 'setAp
   </div>
 );
 
+const themeIcons: Record<Theme, React.FC<{className?: string}>> = {
+    [Theme.Electronics]: ElectronicsIcon,
+    [Theme.Youthful]: YouthfulIcon,
+    [Theme.Fashion]: FashionIcon,
+    [Theme.Book]: BookIcon,
+};
+
 const ThemeControl: React.FC<Pick<SettingsModalProps, 'activeTheme' | 'setActiveTheme'>> = ({ activeTheme, setActiveTheme }) => (
-    <div className="grid grid-cols-3 gap-3">
-        {Object.values(Theme).map(theme => (
-            <button key={theme} onClick={() => setActiveTheme(theme)} className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors ${activeTheme === theme ? 'border-[var(--primary-accent)]' : 'border-transparent bg-[var(--background-tertiary)] hover:border-[var(--text-tertiary)]'}`}>
-                {theme === Theme.Electronics && <ElectronicsIcon />}
-                {theme === Theme.Youthful && <YouthfulIcon />}
-                {theme === Theme.Fashion && <FashionIcon />}
-                <span className="text-xs font-semibold">{theme}</span>
-            </button>
-        ))}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {Object.values(Theme).map(theme => {
+            const Icon = themeIcons[theme];
+            return (
+                <button key={theme} onClick={() => setActiveTheme(theme)} className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors ${activeTheme === theme ? 'border-[var(--primary-accent)]' : 'border-transparent bg-[var(--background-tertiary)] hover:border-[var(--text-tertiary)]'}`}>
+                    <Icon />
+                    <span className="text-xs font-semibold">{theme}</span>
+                </button>
+            )
+        })}
     </div>
 );
+
 
 const LanguageControl: React.FC<Pick<SettingsModalProps, 'locale' | 'setLocale'>> = ({ locale, setLocale }) => (
     <div className="flex gap-2 p-1 bg-[var(--background-tertiary)] rounded-[var(--border-radius)]">

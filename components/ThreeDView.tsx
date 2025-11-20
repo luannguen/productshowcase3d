@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ThreeDViewProps {
@@ -16,25 +15,10 @@ const ThreeDView: React.FC<ThreeDViewProps> = ({ themeStyles }) => {
           frameBorder="0"
           allowFullScreen
           allow="autoplay; fullscreen; xr-spatial-tracking"
-          src={`https://sketchfab.com/models/c6e193ac304e477aaed7946289dbe150/embed?preload=1&transparent=1&ui_theme=dark&background=${backgroundColor}&ui_zoom=1&ui_pan=1`}
+          src={`https://sketchfab.com/models/503d0a0b273b435c93922578505d93b3/embed?autospin=1&autostart=1&ui_theme=${backgroundColor.startsWith('f') ? 'light' : 'dark'}&ui_controls=0&ui_infos=0&ui_watermark=0&preload=1&camera=0`}
           className="w-full h-full"
-        >
-        </iframe>
+        ></iframe>
       </div>
-       <p className="text-sm text-[var(--text-secondary)] mt-4 text-center">
-        Use the on-screen controls or your mouse to interact: click & drag to rotate, scroll to zoom, and right-click to pan.
-      </p>
-      <p className="text-sm font-normal mt-2 text-[var(--text-secondary)] text-center">
-        <a href="https://sketchfab.com/3d-models/laptop-and-mouse-c6e193ac304e477aaed7946289dbe150?utm_medium=embed&utm_campaign=share-popup&utm_content=c6e193ac304e477aaed7946289dbe150" target="_blank" rel="noopener noreferrer nofollow" className="font-bold text-[var(--primary-accent)] hover:underline">
-          Laptop and mouse
-        </a> by 
-        <a href="https://sketchfab.com/nickbroad?utm_medium=embed&utm_campaign=share-popup&utm_content=c6e193ac304e477aaed7946289dbe150" target="_blank" rel="noopener noreferrer nofollow" className="font-bold text-[var(--primary-accent)] hover:underline">
-          Nick Broad
-        </a> on 
-        <a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=c6e193ac304e477aaed7946289dbe150" target="_blank" rel="noopener noreferrer nofollow" className="font-bold text-[var(--primary-accent)] hover:underline">
-          Sketchfab
-        </a>
-      </p>
     </div>
   );
 };

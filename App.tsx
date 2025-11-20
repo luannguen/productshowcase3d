@@ -1,9 +1,10 @@
 
+
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense, useRef } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
-import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption, QuickViewProduct, WishlistItem, RecentlyViewedItem, ChatMessage, Appearance, CompareItem, Locale, BreadcrumbItem, OnboardingStep } from './types';
-import { themes } from './constants';
-import { ManageIcon, CartIcon, CommandIcon, SparklesIcon, MenuIcon, HeartIcon, MessageSquareIcon, SettingsIcon, SearchIcon, ImageIcon, MaximizeIcon, MinimizeIcon } from './components/icons';
+import { Product, ViewMode, Theme, CartItem, ToastMessage, SortOption, QuickViewProduct, WishlistItem, RecentlyViewedItem, ChatMessage, Appearance, CompareItem, Locale, BreadcrumbItem, OnboardingStep, Notification, VoiceCommand, PurchasedItem, UserEdition, PageBlock } from './types';
+import { themes, initialNotifications } from './constants';
+import { ManageIcon, CartIcon, CommandIcon, SparklesIcon, MenuIcon, HeartIcon, MessageSquareIcon, SettingsIcon, SearchIcon, ImageIcon, MaximizeIcon, MinimizeIcon, BellIcon, UserIcon } from './components/icons';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import SearchBar from './components/SearchBar';
 import MobileMenu from './components/MobileMenu';
@@ -11,6 +12,7 @@ import Tooltip from './components/Tooltip';
 import AccessibilityAnnouncer from './components/AccessibilityAnnouncer';
 import { TranslationProvider, useTranslation } from './hooks/useTranslation';
 import useLocalStorage from './hooks/useLocalStorage';
+import useVoiceNavigation from './hooks/useVoiceNavigation';
 import ToastContainer from './components/Toast';
 
 // New Component Imports
@@ -18,6 +20,10 @@ import FilterSidebar from './components/FilterSidebar';
 import RecentlyViewed from './components/RecentlyViewed';
 import CompareTray from './components/CompareTray';
 import Breadcrumbs from './components/Breadcrumbs';
+import CustomCursor from './components/CustomCursor';
+import ScrollToTopButton from './components/ScrollToTopButton';
+import MiniMapScroll from './components/MiniMapScroll';
+import TrendingProducts from './components/TrendingProducts';
 
 // Lazy load Modals for Performance
 const ProductDetailModal = lazy(() => import('./components/ProductDetailModal'));
@@ -33,6 +39,10 @@ const CompareModal = lazy(() => import('./components/CompareModal'));
 const VisualSearchModal = lazy(() => import('./components/VisualSearchModal'));
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const ConfirmationModal = lazy(() => import('./components/ConfirmationModal'));
+const NotificationCenter = lazy(() => import('./components/NotificationCenter'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
+const BookEditor = lazy(() => import('./components/BookEditor'));
+const EditionView = lazy(() => import('./components/EditionView'));
 
 
 // Lazy load views for Code Splitting
@@ -43,6 +53,8 @@ const FlipView = lazy(() => import('./components/FlipView'));
 const CarouselView = lazy(() => import('./components/CarouselView'));
 const ThreeDView = lazy(() => import('./components/ThreeDView'));
 const StoryView = lazy(() => import('./components/StoryView'));
+const ForYouView = lazy(() => import('./components/ForYouView'));
+const BookView = lazy(() => import('./components/BookView'));
 const ViewSwitcher = lazy(() => import('./components/ViewSwitcher'));
 
 // Debounce Hook
@@ -56,6 +68,33 @@ const useDebounce = (value: string, delay: number) => {
 };
 
 const ITEMS_PER_PAGE = 8;
+
+const samplePurchasedItems: PurchasedItem[] = [
+    { ...themes[Theme.Book].products[0], purchaseDate: Date.now() - 86400000 * 2 },
+    { ...themes[Theme.Book].products[1], purchaseDate: Date.now() - 86400000 * 5 },
+    { ...themes[Theme.Book].products[2], purchaseDate: Date.now() - 86400000 * 5 },
+];
+
+const sampleUserEditions: UserEdition[] = [{
+    id: 'sample-edition-1',
+    baseProductId: 25,
+    name: "Chronos Remix: The Video Chapter",
+    coverImageUrl: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=800&auto=format&fit=crop',
+    baseProduct: themes[Theme.Book].products[0],
+    content: [
+        { blocks: [
+            { id: `block-${Date.now()}-1`, type: 'text', content: '<h1>My Awesome Chapter 1</h1><p>This is my custom version of the first page. I can add <strong>bold text</strong> and whatever I want.</p>' }, 
+            { id: `block-${Date.now()}-2`, type: 'image', src: 'https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=800' }
+        ] },
+        { blocks: [
+            { id: `block-${Date.now()}-3`, type: 'text', content: 'This is the original second page, but with a video!' }, 
+            { id: `block-${Date.now()}-4`, type: 'video', src: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+        ] }
+    ],
+    status: 'published',
+    publishedAt: Date.now() - 86400000,
+}];
+
 
 const AppContent: React.FC = () => {
   type ViewModeSettings = { [key in Theme]?: ViewMode };
@@ -100,6 +139,17 @@ const AppContent: React.FC = () => {
   const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const [flyingImage, setFlyingImage] = useState<{ src: string; rect: DOMRect } | null>(null);
   const [isZenMode, setZenMode] = useState(false);
+  const [notifications, setNotifications] = useLocalStorage<Notification[]>('notifications', initialNotifications);
+  const [isNotificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const [readingBook, setReadingBook] = useState<Product | null>(null);
+  const [isProfileVisible, setIsProfileVisible] = useState(false);
+  const [purchasedItems, setPurchasedItems] = useLocalStorage<PurchasedItem[]>('purchasedItems', samplePurchasedItems);
+  
+  // Co-authoring State
+  const [userEditions, setUserEditions] = useLocalStorage<UserEdition[]>('userEditions', sampleUserEditions);
+  const [editingEdition, setEditingEdition] = useState<UserEdition | null>(null);
+  const [viewingEditionId, setViewingEditionId] = useState<string | null>(null);
+
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -117,13 +167,25 @@ const AppContent: React.FC = () => {
     return appearance;
   }, [appearance, isSystemDark]);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editionId = urlParams.get('edition');
+    if (editionId) {
+        const editionExists = userEditions.some(e => e.id === editionId);
+        if (editionExists) {
+            setViewingEditionId(editionId);
+        }
+    }
+  }, [userEditions]);
+
   const currentThemeStyles = appThemes[activeTheme].styles[finalAppearance];
   const PRODUCTS = appThemes[activeTheme].products;
   
   useEffect(() => {
     document.documentElement.className = finalAppearance === 'high-contrast' ? 'dark' : finalAppearance;
     document.body.classList.toggle('zen-mode', isZenMode);
-  }, [finalAppearance, isZenMode]);
+    document.body.classList.toggle('custom-cursor-enabled', !reduceMotion);
+  }, [finalAppearance, isZenMode, reduceMotion]);
   
   useEffect(() => {
     document.body.classList.add('gradient-bg');
@@ -142,19 +204,6 @@ const AppContent: React.FC = () => {
     return () => { document.head.removeChild(style); };
   }, [activeTheme, finalAppearance, currentThemeStyles, selectedProduct]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setCommandPaletteOpen(isOpen => !isOpen); }
-    };
-    const handleScroll = () => setIsHeaderScrolled(window.scrollY > 10);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-        window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-  
   const allAvailableProducts = useMemo(() => [...new Set(PRODUCTS.map(p => p.category))].sort(), [PRODUCTS]);
   const allAvailableColors = useMemo(() => [...new Set(PRODUCTS.flatMap(p => p.colors || []))].sort(), [PRODUCTS]);
   
@@ -174,6 +223,46 @@ const AppContent: React.FC = () => {
     setVisibleProductsCount(ITEMS_PER_PAGE);
   }, [activeTheme, maxPrice, resetFilters]);
 
+  // Voice Navigation Commands
+  const voiceCommands: VoiceCommand[] = useMemo(() => [
+    { keyword: ['search for', 'find'], action: (param) => setSearchQuery(param) },
+    { keyword: ['clear search'], action: () => setSearchQuery('') },
+    { keyword: ['open cart'], action: () => setCartModalOpen(true) },
+    { keyword: ['close cart'], action: () => setCartModalOpen(false) },
+    { keyword: ['open wishlist'], action: () => setWishlistOpen(true) },
+    { keyword: ['change theme to'], action: (param) => {
+        const themeKey = Object.keys(Theme).find(k => k.toLowerCase() === param.toLowerCase());
+        if(themeKey) setActiveTheme(Theme[themeKey as keyof typeof Theme]);
+    } },
+    { keyword: ['change view to'], action: (param) => {
+        const viewKey = Object.keys(ViewMode).find(k => k.toLowerCase() === param.toLowerCase());
+        if(viewKey) setViewMode(ViewMode[viewKey as keyof typeof ViewMode]);
+    } },
+    { keyword: ['scroll down'], action: () => window.scrollBy({ top: window.innerHeight / 2, behavior: 'smooth'}) },
+    { keyword: ['scroll up'], action: () => window.scrollBy({ top: -window.innerHeight / 2, behavior: 'smooth'}) },
+  ], [setActiveTheme, setViewMode]);
+  
+  const { isListening, toggleListening } = useVoiceNavigation(voiceCommands);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { 
+            e.preventDefault(); 
+            setCommandPaletteOpen(isOpen => !isOpen); 
+        } else if (e.key === 'Escape' && isZenMode) {
+            e.preventDefault();
+            setZenMode(false);
+        }
+    };
+    const handleScroll = () => setIsHeaderScrolled(window.scrollY > 10);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isZenMode]);
+  
   const filteredProducts = useMemo(() => {
     let processed = [...PRODUCTS].filter(p => {
       const searchLower = debouncedSearchQuery.toLowerCase();
@@ -183,7 +272,7 @@ const AppContent: React.FC = () => {
              (selectedColors.length === 0 || p.colors?.some(c => selectedColors.includes(c)));
     });
     switch (sortOption) {
-      case 'name-asc': processed.sort((a, b) => a.name.localeCompare(b.name)); break;
+      case 'name-asc': processed.sort((a, b) => a.name.localeCompare(a.name)); break;
       case 'name-desc': processed.sort((a, b) => b.name.localeCompare(a.name)); break;
       case 'price-asc': processed.sort((a, b) => a.price - b.price); break;
       case 'price-desc': processed.sort((a, b) => b.price - a.price); break;
@@ -194,14 +283,35 @@ const AppContent: React.FC = () => {
   }, [PRODUCTS, debouncedSearchQuery, priceRange, selectedCategories, selectedColors, sortOption]);
 
   const paginatedProducts = useMemo(() => filteredProducts.slice(0, visibleProductsCount), [filteredProducts, visibleProductsCount]);
+  const trendingProducts = useMemo(() => PRODUCTS.filter(p => p.tags?.includes('Best Seller')), [PRODUCTS]);
 
+  const addToast = (message: string) => setToasts(prev => [...prev, { id: Date.now(), message }]);
   useEffect(() => { setAnnouncerMessage(debouncedSearchQuery ? `Showing ${filteredProducts.length} products.` : ''); }, [filteredProducts.length, debouncedSearchQuery]);
 
+  useEffect(() => {
+    if (viewMode === ViewMode.ReadBook) {
+      const firstBook = PRODUCTS.find(p => p.content && p.content.length > 0);
+      if (firstBook) {
+        setReadingBook(firstBook);
+      } else {
+        addToast("No readable books in this collection.");
+        setViewMode(ViewMode.Grid);
+      }
+    }
+  }, [viewMode, PRODUCTS, setViewMode]);
+  
+  const handleReaderClose = useCallback(() => {
+    setReadingBook(null);
+    if (viewMode === ViewMode.ReadBook) {
+      setViewMode(ViewMode.Grid); // Revert to a default view
+    }
+  }, [viewMode, setViewMode]);
+  
   const handleSetView = useCallback((newView: ViewMode) => {
     setViewMode(newView);
     setAnnouncerMessage(`Switched to ${newView} view.`);
   }, [setViewMode]);
-  const addToast = (message: string) => setToasts(prev => [...prev, { id: Date.now(), message }]);
+
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
   const handleAddToCart = useCallback((product: Product, quantity: number = 1, event?: React.MouseEvent<HTMLButtonElement>) => {
@@ -210,7 +320,8 @@ const AppContent: React.FC = () => {
       return;
     }
     if (event && !reduceMotion) {
-      const rect = event.currentTarget.getBoundingClientRect();
+      const targetEl = event.currentTarget.closest('.group')?.querySelector('img') || event.currentTarget;
+      const rect = targetEl.getBoundingClientRect();
       setFlyingImage({ src: product.imageUrl, rect });
     }
     setCart(prev => {
@@ -247,10 +358,94 @@ const AppContent: React.FC = () => {
   const handleRemoveFromCart = (id: number) => setCart(p => p.filter(i => i.product.id !== id));
   const handleClearCart = () => setConfirmation({ title: 'Clear Cart', message: 'Are you sure you want to remove all items from your cart?', onConfirm: () => { setCart([]); setConfirmation(null); } });
   const handleCheckout = () => { setCartModalOpen(false); setPurchaseModalOpen(true); };
-  const handlePurchaseSuccess = () => { addToast('Purchase successful!'); setPurchaseModalOpen(false); setCart([]); };
-  const handleUpdateProductImage = (id: number, url: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, imageUrl: url } : p) } }));
-  const handleUpdateProductDescription = (id: number, desc: string) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, description: desc } : p) } }));
-  const handleUpdateProductStory = (id: number, story: { title: string; narrative: string; }) => setAppThemes(c => ({ ...c, [activeTheme]: { ...c[activeTheme], products: c[activeTheme].products.map(p => p.id === id ? { ...p, story: { ...p.story!, ...story } } : p) } }));
+  
+  const handlePurchaseSuccess = (purchasedCart: CartItem[]) => {
+    addToast('Purchase successful!');
+    const newPurchases: PurchasedItem[] = purchasedCart.map(item => ({
+        ...item.product,
+        purchaseDate: Date.now()
+    }));
+    setPurchasedItems(prev => [...prev, ...newPurchases]);
+    setCart([]);
+  };
+
+  const sendProductToWebhook = async (product: Product) => {
+    const webhookUrl = 'https://luannguyen0891.app.n8n.cloud/webhook-test/get-data-product';
+    const payload = {
+        productName: product.name,
+        productDetail: product.description,
+        urlImage: product.imageUrl,
+        story: product.story,
+        description: product.description,
+    };
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Fix for CORS 'Failed to fetch' error
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+        // In 'no-cors' mode, we can't read the response, so we optimistically log success.
+        console.log('Product data sent to webhook.');
+    } catch (error) {
+        console.error('Failed to send product data to webhook:', error);
+    }
+  };
+
+  const handleUpdateProductImage = (id: number, url: string) => {
+    setAppThemes(c => {
+        let updatedProduct: Product | null = null;
+        const newProducts = c[activeTheme].products.map(p => {
+            if (p.id === id) {
+                updatedProduct = { ...p, imageUrl: url };
+                return updatedProduct;
+            }
+            return p;
+        });
+        if (updatedProduct) {
+            sendProductToWebhook(updatedProduct);
+        }
+        return { ...c, [activeTheme]: { ...c[activeTheme], products: newProducts } };
+    });
+  };
+  
+  const handleUpdateProductDescription = (id: number, desc: string) => {
+    setAppThemes(c => {
+        let updatedProduct: Product | null = null;
+        const newProducts = c[activeTheme].products.map(p => {
+            if (p.id === id) {
+                updatedProduct = { ...p, description: desc };
+                return updatedProduct;
+            }
+            return p;
+        });
+        if (updatedProduct) {
+            sendProductToWebhook(updatedProduct);
+        }
+        return { ...c, [activeTheme]: { ...c[activeTheme], products: newProducts } };
+    });
+  };
+
+  const handleUpdateProductStory = (id: number, story: { title: string; narrative: string; }) => {
+    setAppThemes(c => {
+        let updatedProduct: Product | null = null;
+        const newProducts = c[activeTheme].products.map(p => {
+            if (p.id === id) {
+                updatedProduct = { ...p, story: { ...p.story!, ...story } };
+                return updatedProduct;
+            }
+            return p;
+        });
+        if (updatedProduct) {
+            sendProductToWebhook(updatedProduct);
+        }
+        return { ...c, [activeTheme]: { ...c[activeTheme], products: newProducts } };
+    });
+  };
+  
   const handleProductClick = (product: Product) => { setSelectedProduct(product); setRecentlyViewed(prev => [product, ...prev.filter(p => p.id !== product.id)].slice(0, 10)); };
   const handleQuickView = (product: Product) => setQuickViewProduct(product);
   const handleBuyNow = (product: Product, quantity: number) => { handleAddToCart(product, quantity); setSelectedProduct(null); setQuickViewProduct(null); handleCheckout(); };
@@ -261,11 +456,54 @@ const AppContent: React.FC = () => {
     setCompareItems(prev => prev.find(p => p.id === product.id) ? prev.filter(p => p.id !== product.id) : (prev.length < 4 ? [...prev, product] : prev));
   };
   const isProductInCompare = (id: number) => compareItems.some(p => p.id === id);
+  const handleReadBook = (product: Product) => { setIsProfileVisible(false); setReadingBook(product); }
+  
+  // Co-authoring handlers
+  const handleCreateEdition = (product: Product) => {
+    const newEdition: UserEdition = {
+        id: `edition-${Date.now()}`,
+        baseProductId: product.id,
+        name: `My Edition of ${product.name}`,
+        coverImageUrl: product.imageUrl,
+        baseProduct: product,
+        content: product.content?.map(pageText => ({ 
+            blocks: [{ id: `block-${Date.now()}-${Math.random()}`, type: 'text', content: pageText }] 
+        })) || [{ blocks: [{ id: `block-${Date.now()}`, type: 'text', content: 'Start writing here...'}] }],
+        status: 'draft',
+    };
+    setUserEditions(prev => [...prev, newEdition]);
+    setEditingEdition(newEdition);
+    setIsProfileVisible(false);
+  };
+  
+  const handleEditEdition = (edition: UserEdition) => {
+    setEditingEdition(edition);
+    setIsProfileVisible(false);
+  };
+
+  const handleSaveEdition = (updatedEdition: UserEdition) => {
+    setUserEditions(prev => prev.map(e => e.id === updatedEdition.id ? updatedEdition : e));
+    addToast(`${updatedEdition.name} saved!`);
+  };
+
+  const handlePublishEdition = (editionToPublish: UserEdition) => {
+    const updatedEdition = {
+        ...editionToPublish,
+        status: 'published' as const,
+        publishedAt: Date.now(),
+    };
+    setUserEditions(prev => prev.map(e => e.id === updatedEdition.id ? updatedEdition : e));
+    setEditingEdition(null);
+    addToast(`${updatedEdition.name} has been published!`);
+  };
+
+  const handleCloseEditor = () => setEditingEdition(null);
+
 
   const cartItemCount = useMemo(() => cart.reduce((t, i) => t + i.quantity, 0), [cart]);
   const isAnyModalOpen = isManageModalOpen || isPurchaseModalOpen || !!selectedProduct || isCartModalOpen || isCommandPaletteOpen || isMobileMenuOpen || !!quickViewProduct || isWishlistOpen || isCompareModalOpen || isSettingsModalOpen || isVisualSearchOpen || !!confirmation;
   
-  useEffect(() => { document.body.style.overflow = isAnyModalOpen ? 'hidden' : 'auto'; }, [isAnyModalOpen]);
+  useEffect(() => { document.body.style.overflow = isAnyModalOpen || isProfileVisible || !!editingEdition || !!viewingEditionId ? 'hidden' : 'auto'; }, [isAnyModalOpen, isProfileVisible, editingEdition, viewingEditionId]);
 
   const breadcrumbs = useMemo<BreadcrumbItem[]>(() => {
     const crumbs: BreadcrumbItem[] = [{ label: 'Home', onClick: () => { setSelectedProduct(null); resetFilters(); } }];
@@ -290,8 +528,8 @@ const AppContent: React.FC = () => {
         </div>
       );
     }
-    const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist, onToggleCompare: handleToggleCompare, isProductInCompare, onAddToCollection: handleAddToCollection, onNotifyMe: handleNotifyMe };
-    const viewProps = { ...baseProps, products: paginatedProducts, reduceMotion };
+    const baseProps = { onProductClick: handleProductClick, onAddToCart: handleAddToCart, onQuickView: handleQuickView, onToggleWishlist: handleToggleWishlist, isProductInWishlist, onToggleCompare: handleToggleCompare, isProductInCompare, onAddToCollection: handleAddToCollection, onNotifyMe: handleNotifyMe, reduceMotion, onReadBook: handleReadBook };
+    const viewProps = { ...baseProps, products: paginatedProducts };
     const viewPropsWithSearch = { ...viewProps, searchQuery: debouncedSearchQuery };
 
     switch (viewMode) {
@@ -299,24 +537,95 @@ const AppContent: React.FC = () => {
       case ViewMode.List: return <ListView {...viewPropsWithSearch} />;
       case ViewMode.Table: return <TableView products={paginatedProducts} onProductClick={handleProductClick} />;
       case ViewMode.Flip: return <FlipView {...viewProps} />;
-      case ViewMode.Carousel: return <CarouselView products={paginatedProducts} onProductClick={handleProductClick} onAddToCart={handleAddToCart} />;
+      case ViewMode.Carousel: return <CarouselView products={paginatedProducts} onProductClick={handleProductClick} onAddToCart={(p) => handleAddToCart(p, 1)} />;
       case ViewMode.ThreeD: return <ThreeDView themeStyles={currentThemeStyles} />;
-      case ViewMode.Story: return <StoryView {...baseProps} products={paginatedProducts.filter(p => p.story)} reduceMotion={reduceMotion} />;
+      case ViewMode.Story: return <StoryView {...baseProps} products={paginatedProducts.filter(p => p.story)} />;
+      case ViewMode.ForYou: return <ForYouView {...baseProps} allProducts={PRODUCTS} cart={cart} wishlist={wishlist} recentlyViewed={recentlyViewed} searchQuery={debouncedSearchQuery} />;
+      case ViewMode.ReadBook: return <GridView {...viewPropsWithSearch} />; // Default display while reader is loading
       default: return <GridView {...viewPropsWithSearch} />;
     }
   };
   
   const filterProps = { priceRange, setPriceRange, maxPrice, categories: allAvailableProducts, selectedCategories, setSelectedCategories, colors: allAvailableColors, selectedColors, setSelectedColors, sortOption, setSortOption, resetFilters };
   const settingsProps = { activeTheme, setActiveTheme, appearance, setAppearance, reduceMotion, setReduceMotion, locale, setLocale };
+  const unreadNotifications = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
+  
+  const viewingEdition = useMemo(() => {
+    if (!viewingEditionId) return null;
+    const allEditions = [...sampleUserEditions, ...userEditions];
+    return allEditions.find(e => e.id === viewingEditionId);
+  }, [viewingEditionId, userEditions]);
+  
+  if (viewingEdition) {
+    return (
+        <Suspense fallback={<div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">Loading Edition...</div>}>
+            <EditionView edition={viewingEdition} onExit={() => {
+                setViewingEditionId(null);
+                window.history.pushState({}, '', window.location.pathname);
+            }} />
+        </Suspense>
+    );
+  }
+
+  if (readingBook) {
+    return (
+      <Suspense fallback={<div className="w-screen h-screen flex items-center justify-center bg-[var(--background-primary)] text-[var(--text-primary)]">Loading Reader...</div>}>
+        <BookView product={readingBook} onClose={handleReaderClose} />
+      </Suspense>
+    );
+  }
+
+  if (editingEdition) {
+    return (
+        <Suspense fallback={<div className="w-screen h-screen flex items-center justify-center bg-[var(--background-primary)] text-[var(--text-primary)]">Loading Editor...</div>}>
+            <BookEditor 
+                edition={editingEdition}
+                onSave={handleSaveEdition}
+                onPublish={handlePublishEdition}
+                onClose={handleCloseEditor}
+            />
+        </Suspense>
+    );
+  }
   
   return (
     <>
+      <CustomCursor />
       <AccessibilityAnnouncer message={announcerMessage} />
-      <div className={`main-content-wrapper ${isAnyModalOpen ? 'modal-open-blur' : ''}`}>
+      <AnimatePresence>
+        {isProfileVisible && (
+            <Suspense fallback={<div className="w-screen h-screen flex items-center justify-center bg-[var(--background-primary)] text-[var(--text-primary)]">Loading Profile...</div>}>
+                <UserProfile 
+                    purchasedItems={purchasedItems}
+                    userEditions={userEditions}
+                    onClose={() => setIsProfileVisible(false)}
+                    onReadBook={handleReadBook}
+                    onCreateEdition={handleCreateEdition}
+                    onEditEdition={handleEditEdition}
+                />
+            </Suspense>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isZenMode && (
+          <motion.button
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            onClick={() => setZenMode(false)}
+            className="zen-mode-exit-btn p-2 bg-[var(--background-secondary)]/50 text-[var(--text-primary)] rounded-full shadow-lg hover:bg-[var(--primary-accent)] backdrop-blur-sm"
+            aria-label="Exit Zen Mode"
+          >
+            <MinimizeIcon className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+      <div className={`main-content-wrapper ${isAnyModalOpen || isProfileVisible ? 'modal-open-blur' : ''}`}>
         <header id="main-header" className={`glass-header sticky top-0 z-20 ${isHeaderScrolled ? 'scrolled-header' : ''}`}>
           <div className="container mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
             <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--header-gradient-from)] to-[var(--header-gradient-to)] order-1">{t('showcaseTitle')}</h1>
             <div className="hidden lg:flex flex-grow items-center justify-center gap-4 order-2">
+                <SearchBar value={searchQuery} onChange={setSearchQuery} onVoiceSearch={toggleListening} isListening={isListening} />
             </div>
             <div className="hidden lg:flex items-center gap-2 order-3">
               <Suspense fallback={<div className="w-96 h-10 bg-[var(--background-tertiary)] rounded-md" />}><ViewSwitcher currentView={viewMode} setView={handleSetView} /></Suspense>
@@ -329,12 +638,16 @@ const AppContent: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-4 order-2 lg:hidden">
-                <Tooltip text={t('settingsTooltip')}><motion.button onClick={() => setSettingsModalOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><SettingsIcon className="w-6 h-6" /></motion.button></Tooltip>
-                <Tooltip text={t('wishlistTooltip', {count: wishlist.length})}><motion.button onClick={() => setWishlistOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><HeartIcon className="w-6 h-6" /></motion.button></Tooltip>
-                <Tooltip text={t('cartTooltip', {count: cartItemCount})}><motion.button ref={cartIconRef} animate={cartIconControls} onClick={() => setCartModalOpen(true)} className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><CartIcon className="w-6 h-6" />{cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{cartItemCount}</span>)}</motion.button></Tooltip>
+                <SearchBar value={searchQuery} onChange={setSearchQuery} onVoiceSearch={toggleListening} isListening={isListening} />
                 <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--primary-accent)]" aria-label="Open menu"><MenuIcon className="w-6 h-6" /></button>
             </div>
             <div className="hidden lg:flex items-center gap-3 order-4">
+                <div className="relative">
+                    <Tooltip text={t('notificationsTooltip')}><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setNotificationCenterOpen(o => !o)} className="relative p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><BellIcon className="w-5 h-5" />{unreadNotifications > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{unreadNotifications}</span>)}</motion.button></Tooltip>
+                    {/* FIX: Removed Suspense wrapper as NotificationCenter is not lazy-loaded */}
+                    <AnimatePresence>{isNotificationCenterOpen && <NotificationCenter notifications={notifications} onClear={() => {}} onClearAll={() => setNotifications([])} />}</AnimatePresence>
+                </div>
+                <Tooltip text="Profile"><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setIsProfileVisible(true)} className="p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><UserIcon className="w-5 h-5" /></motion.button></Tooltip>
                 <Tooltip text={t('settingsTooltip')}><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setSettingsModalOpen(true)} className="p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><SettingsIcon className="w-5 h-5" /></motion.button></Tooltip>
                 <Tooltip text={t('wishlistTooltip', {count: wishlist.length})}><motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setWishlistOpen(true)} className="relative p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><HeartIcon className="w-5 h-5" />{wishlist.length > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{wishlist.length}</span>)}</motion.button></Tooltip>
                 <Tooltip text={t('cartTooltip', {count: cartItemCount})}><motion.button ref={cartIconRef} animate={cartIconControls} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setCartModalOpen(true)} className="relative p-2 bg-[var(--background-tertiary)] rounded-[var(--border-radius)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)]"><CartIcon className="w-5 h-5" />{cartItemCount > 0 && (<span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary-accent)] text-white text-[10px] font-bold">{cartItemCount}</span>)}</motion.button></Tooltip>
@@ -344,6 +657,7 @@ const AppContent: React.FC = () => {
         
         <main className="container mx-auto px-4 py-8">
             <Breadcrumbs items={breadcrumbs} />
+            {viewMode !== ViewMode.ForYou && <TrendingProducts products={trendingProducts} onProductClick={handleProductClick} />}
             <div className="lg:grid lg:grid-cols-4 lg:gap-8">
                 <FilterSidebar
                     {...filterProps}
@@ -399,8 +713,10 @@ const AppContent: React.FC = () => {
 
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CompareTray items={compareItems} onRemove={handleToggleCompare} onCompare={() => setCompareModalOpen(true)} onClear={() => setCompareItems([])} />
+      <ScrollToTopButton />
+      <MiniMapScroll />
       
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterPopoverProps={filterProps} themeSwitcherProps={{ currentTheme: activeTheme, setTheme: setActiveTheme }} viewSwitcherProps={{ currentView: viewMode, setView: handleSetView }} surpriseMe={surpriseMe} openCommandPalette={() => setCommandPaletteOpen(true)} openManageModal={() => setManageModalOpen(true)} openSettingsModal={() => setSettingsModalOpen(true)} />
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} searchQuery={searchQuery} setSearchQuery={setSearchQuery} filterPopoverProps={{...filterProps}} themeSwitcherProps={{ currentTheme: activeTheme, setTheme: setActiveTheme }} viewSwitcherProps={{ currentView: viewMode, setView: handleSetView }} surpriseMe={surpriseMe} openCommandPalette={() => setCommandPaletteOpen(true)} openManageModal={() => setManageModalOpen(true)} openSettingsModal={() => setSettingsModalOpen(true)} />
       
       <Suspense>{isAIAssistantOpen && <AIAssistant isOpen={isAIAssistantOpen} setIsOpen={setAIAssistantOpen} chatHistory={chatHistory} setChatHistory={setChatHistory} products={PRODUCTS}/>}</Suspense>
       <button onClick={() => setAIAssistantOpen(true)} className="ai-assistant-button fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-30 p-4 bg-[var(--primary-accent)] text-white rounded-full shadow-lg hover:bg-[var(--primary-accent-hover)] transition-all transform hover:scale-110" aria-label="Open AI Assistant"><MessageSquareIcon className="w-8 h-8" /></button>
@@ -411,8 +727,8 @@ const AppContent: React.FC = () => {
           {isCartModalOpen && <CartModal isOpen={isCartModalOpen} onClose={() => setCartModalOpen(false)} cartItems={cart} onUpdateQuantity={handleUpdateCartQuantity} onRemoveItem={handleRemoveFromCart} onClearCart={handleClearCart} onCheckout={handleCheckout} />}
           {isPurchaseModalOpen && <PurchaseModal isOpen={isPurchaseModalOpen} cart={cart} onClose={() => setPurchaseModalOpen(false)} onPurchaseSuccess={handlePurchaseSuccess} />}
           {isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} setView={handleSetView} setTheme={setActiveTheme} />}
-          {isWishlistOpen && <WishlistModal isOpen={isWishlistOpen} onClose={() => setWishlistOpen(false)} wishlistItems={wishlist} onRemoveFromWishlist={handleToggleWishlist} onAddToCart={handleAddToCart} />}
-          {quickViewProduct && <QuickViewModal isOpen={!!quickViewProduct} product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={handleAddToCart} onNavigateToProduct={handleProductClick} />}
+          {isWishlistOpen && <WishlistModal isOpen={isWishlistOpen} onClose={() => setWishlistOpen(false)} wishlistItems={wishlist} onRemoveFromWishlist={handleToggleWishlist} onAddToCart={(p) => handleAddToCart(p, 1)} />}
+          {quickViewProduct && <QuickViewModal isOpen={!!quickViewProduct} product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={(p,q) => handleAddToCart(p,q)} onNavigateToProduct={handleProductClick} />}
           {isSettingsModalOpen && <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} {...settingsProps} />}
           {isCompareModalOpen && <CompareModal isOpen={isCompareModalOpen} onClose={() => setCompareModalOpen(false)} items={compareItems} allProducts={PRODUCTS} />}
           {isVisualSearchOpen && <VisualSearchModal isOpen={isVisualSearchOpen} onClose={() => setVisualSearchOpen(false)} allProducts={PRODUCTS} onProductClick={handleProductClick} />}

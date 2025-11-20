@@ -19,10 +19,11 @@ interface FlipViewProps {
   reduceMotion: boolean;
   onAddToCollection: (product: Product) => void;
   onNotifyMe: (product: Product) => void;
+  onReadBook: (product: Product) => void;
 }
 
 const FlipCard: React.FC<Omit<FlipViewProps, 'products' | 'reduceMotion'> & { product: Product; }> = 
-({ product, onAddToCart, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, onAddToCollection, onNotifyMe }) => {
+({ product, onAddToCart, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, onAddToCollection, onNotifyMe, onReadBook }) => {
     const isOutOfStock = product.stock.level === 'out-of-stock';
     return (
         <div className="group h-80 w-full perspective-1000">
@@ -51,17 +52,22 @@ const FlipCard: React.FC<Omit<FlipViewProps, 'products' | 'reduceMotion'> & { pr
                      </div>
                      <div className="mt-3 flex justify-between items-center w-full">
                         <p className="text-xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
-                        {isOutOfStock ? (
-                             <Tooltip text="Notify Me">
-                                <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onNotifyMe(product); }} className="flex items-center gap-2 px-3 py-2 bg-[var(--background-secondary)] text-[var(--text-primary)] font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all" aria-label={`Notify me about ${product.name}`}>
-                                    <BellIcon className="w-5 h-5" />
+                        <div className="flex items-center gap-2">
+                            {product.content && (
+                                <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onReadBook(product); }} className="px-3 py-2 bg-[var(--background-secondary)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent)] transition-all">Read</motion.button>
+                            )}
+                            {isOutOfStock ? (
+                                <Tooltip text="Notify Me">
+                                    <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onNotifyMe(product); }} className="flex items-center gap-2 px-3 py-2 bg-[var(--background-secondary)] text-[var(--text-primary)] font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all" aria-label={`Notify me about ${product.name}`}>
+                                        <BellIcon className="w-5 h-5" />
+                                    </motion.button>
+                                </Tooltip>
+                            ) : (
+                                <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1, e); }} className="flex items-center gap-2 px-3 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label={`Add ${product.name} to cart`}>
+                                    <CartIcon className="w-5 h-5" /> Add
                                 </motion.button>
-                             </Tooltip>
-                        ) : (
-                            <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1, e); }} className="flex items-center gap-2 px-3 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label={`Add ${product.name} to cart`}>
-                                <CartIcon className="w-5 h-5" /> Add
-                            </motion.button>
-                        )}
+                            )}
+                        </div>
                      </div>
                 </div>
             </div>
@@ -101,6 +107,7 @@ const FlipView: React.FC<FlipViewProps> = React.memo((props) => {
                 isProductInCompare={props.isProductInCompare}
                 onAddToCollection={props.onAddToCollection}
                 onNotifyMe={props.onNotifyMe}
+                onReadBook={props.onReadBook}
               />
             </div>
           </BaseCard>

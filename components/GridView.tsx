@@ -20,6 +20,7 @@ interface GridViewProps {
   reduceMotion: boolean;
   onAddToCollection: (product: Product) => void;
   onNotifyMe: (product: Product) => void;
+  onReadBook: (product: Product) => void;
 }
 
 const highlightMatch = (text: string, query: string) => {
@@ -38,8 +39,8 @@ const StockIndicator: React.FC<{ stock: Product['stock'] }> = ({ stock }) => {
     return <p className="text-sm font-semibold text-green-500">In Stock</p>;
 };
 
-const ProductCardContent: React.FC<Pick<GridViewProps, 'onAddToCart' | 'onQuickView' | 'onToggleWishlist' | 'isProductInWishlist' | 'onToggleCompare' | 'isProductInCompare' | 'onAddToCollection' | 'onNotifyMe'> & { product: Product; searchQuery: string }> = 
-({ product, onAddToCart, searchQuery, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, onAddToCollection, onNotifyMe }) => {
+const ProductCardContent: React.FC<Pick<GridViewProps, 'onAddToCart' | 'onQuickView' | 'onToggleWishlist' | 'isProductInWishlist' | 'onToggleCompare' | 'isProductInCompare' | 'onAddToCollection' | 'onNotifyMe' | 'onReadBook'> & { product: Product; searchQuery: string }> = 
+({ product, onAddToCart, searchQuery, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, onAddToCollection, onNotifyMe, onReadBook }) => {
     const isOutOfStock = product.stock.level === 'out-of-stock';
     return (
         <>
@@ -76,6 +77,15 @@ const ProductCardContent: React.FC<Pick<GridViewProps, 'onAddToCart' | 'onQuickV
         <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-lg font-semibold text-[var(--text-primary)] flex-grow h-14">{highlightMatch(product.name, searchQuery)}</h3>
             <div className="mt-2"><StockIndicator stock={product.stock} /></div>
+            {product.content && (
+              <motion.button 
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => { e.stopPropagation(); onReadBook(product); }}
+                className="w-full mt-4 py-2 bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent)] hover:text-[var(--badge-text-color)] transition-colors"
+              >
+                Read Now
+              </motion.button>
+            )}
             <div className="mt-4 flex justify-between items-center">
             <p className="text-2xl font-bold text-[var(--primary-accent)] tabular-nums">${product.price.toFixed(2)}</p>
             {isOutOfStock ? (
@@ -138,6 +148,7 @@ const GridView: React.FC<GridViewProps> = React.memo((props) => {
                 isProductInCompare={props.isProductInCompare}
                 onAddToCollection={props.onAddToCollection}
                 onNotifyMe={props.onNotifyMe}
+                onReadBook={props.onReadBook}
               />
             </div>
           </BaseCard>

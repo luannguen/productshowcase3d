@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { CartItem } from '../types';
 import BaseModal from './BaseModal';
@@ -7,7 +6,7 @@ interface PurchaseModalProps {
   isOpen: boolean;
   cart: CartItem[];
   onClose: () => void;
-  onPurchaseSuccess: () => void;
+  onPurchaseSuccess: (purchasedCart: CartItem[]) => void;
 }
 
 const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, onPurchaseSuccess }) => {
@@ -39,9 +38,13 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, on
     setStatus('loading');
     setTimeout(() => {
       setStatus('success');
-      onPurchaseSuccess();
     }, 2000); // Simulate network request
   };
+
+  const handleSuccessAndClose = () => {
+    onPurchaseSuccess(cart);
+    onClose();
+  }
 
   const modalTitle = status === 'success' ? 'Order Confirmed' : 'Complete Your Purchase';
   
@@ -112,7 +115,6 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, on
             </button>
         </div>
       </div>
-      {/* FIX: Removed style jsx tag and applied tailwind classes directly */}
     </form>
   );
 
@@ -149,7 +151,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, cart, onClose, on
                 <span className="text-[var(--primary-accent)] tabular-nums">${total.toFixed(2)}</span>
             </div>
         </div>
-         <button onClick={onClose} className="mt-8 px-6 py-2 text-sm bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors">
+         <button onClick={handleSuccessAndClose} className="mt-8 px-6 py-2 text-sm bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors">
             Continue Shopping
         </button>
     </div>

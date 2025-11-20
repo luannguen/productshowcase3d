@@ -18,7 +18,8 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, items, all
   
   if (items.length === 0) return null;
 
-  const allSpecs = Array.from(new Set(items.flatMap(item => Object.keys(item.specifications || {}))));
+  // FIX: Use spread syntax for better type inference to resolve 'unknown' index type error.
+  const allSpecs = [...new Set(items.flatMap(item => Object.keys(item.specifications || {})))];
 
   const generateSummary = async () => {
     setIsLoadingSummary(true);

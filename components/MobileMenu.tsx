@@ -1,10 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchBar from './SearchBar';
-import FilterPopover from './FilterPopover';
+import { FilterControls } from './FilterPopover';
 import ThemeSwitcher from './ThemeSwitcher';
 import ViewSwitcher from './ViewSwitcher';
-// FIX: Added SettingsIcon to imports.
 import { CloseIcon, CommandIcon, ManageIcon, SparklesIcon, SettingsIcon } from './icons';
 
 interface MobileMenuProps {
@@ -12,13 +11,12 @@ interface MobileMenuProps {
   onClose: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filterPopoverProps: React.ComponentProps<typeof FilterPopover>;
+  filterPopoverProps: React.ComponentProps<typeof FilterControls>;
   themeSwitcherProps: React.ComponentProps<typeof ThemeSwitcher>;
   viewSwitcherProps: React.ComponentProps<typeof ViewSwitcher>;
   surpriseMe: () => void;
   openCommandPalette: () => void;
   openManageModal: () => void;
-  // FIX: Added missing openSettingsModal prop.
   openSettingsModal: () => void;
 }
 
@@ -68,9 +66,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <div className="flex-grow p-6 overflow-y-auto space-y-8">
               <div className="space-y-4">
                 <SearchBar value={searchQuery} onChange={setSearchQuery} />
-                <div className="flex justify-start">
-                    <FilterPopover {...filterPopoverProps} />
-                </div>
+                 <div className="p-4 bg-[var(--background-secondary)] rounded-[var(--border-radius)]">
+                    <FilterControls {...filterPopoverProps} />
+                 </div>
               </div>
 
               <div>
@@ -91,7 +89,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     <button onClick={() => handleAction(surpriseMe)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><SparklesIcon className="w-5 h-5"/> Surprise Me</button>
                     <button onClick={() => handleAction(openCommandPalette)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><CommandIcon className="w-5 h-5"/> Command Palette</button>
                     <button onClick={() => handleAction(openManageModal)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><ManageIcon className="w-5 h-5"/> Manage Products</button>
-                    {/* FIX: Added Settings button. */}
                     <button onClick={() => handleAction(openSettingsModal)} className="flex items-center gap-3 p-2 text-lg text-[var(--text-primary)] hover:text-[var(--primary-accent)] transition-colors w-full text-left rounded-md hover:bg-[var(--background-secondary)]"><SettingsIcon className="w-5 h-5"/> Settings</button>
                 </div>
               </div>

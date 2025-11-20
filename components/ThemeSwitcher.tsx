@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Theme } from '../types';
 import Tooltip from './Tooltip';
-import { ElectronicsIcon, FashionIcon, YouthfulIcon } from './icons';
+import { ElectronicsIcon, FashionIcon, YouthfulIcon, BookIcon } from './icons';
 
 interface ThemeSwitcherProps {
   currentTheme: Theme;
@@ -14,6 +14,7 @@ const themeOptions = [
     { theme: Theme.Electronics, label: 'Electronics', Icon: ElectronicsIcon },
     { theme: Theme.Youthful, label: 'Youthful', Icon: YouthfulIcon },
     { theme: Theme.Fashion, label: 'Fashion', Icon: FashionIcon },
+    { theme: Theme.Book, label: 'Book', Icon: BookIcon },
 ];
 
 const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ currentTheme, setTheme }) => {

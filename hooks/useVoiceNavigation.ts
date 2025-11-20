@@ -1,14 +1,32 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { VoiceCommand } from '../types';
 
-// FIX: Add type definitions for the Web Speech API to resolve TypeScript errors.
+// Type definitions for the Web Speech API to resolve TypeScript errors.
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResult[];
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   lang: string;
   interimResults: boolean;
   maxAlternatives: number;
-  onresult: (event: any) => void;
-  onerror: (event: any) => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
   onend: () => void;
   start: () => void;
   stop: () => void;
@@ -19,14 +37,12 @@ const useVoiceNavigation = (commands: VoiceCommand[]) => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    // FIX: Check for the API on the window object using a type assertion to any.
-    if (typeof window === 'undefined' || !(window as any).webkitSpeechRecognition) {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
       console.warn('Speech Recognition API not supported in this browser.');
       return;
     }
 
-    // FIX: Use type assertion to create an instance of the speech recognition object.
-    const SpeechRecognition = (window as any).webkitSpeechRecognition;
     const recognition: SpeechRecognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.lang = 'en-US';
@@ -39,8 +55,8 @@ const useVoiceNavigation = (commands: VoiceCommand[]) => {
 
       for (const command of commands) {
         for (const keyword of command.keyword) {
-          if (transcript.includes(keyword)) {
-            const param = transcript.replace(keyword, '').trim();
+          if (transcript.startsWith(keyword)) {
+            const param = transcript.substring(keyword.length).trim();
             command.action(param);
             return; // Execute first matched command
           }
@@ -67,9 +83,13 @@ const useVoiceNavigation = (commands: VoiceCommand[]) => {
     if (isListening) {
       recognitionRef.current.stop();
     } else {
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        console.error("Could not start recognition", e);
+      }
     }
-    setIsListening(prev => !prev);
   }, [isListening]);
 
   return { isListening, toggleListening };

@@ -551,6 +551,96 @@ const fashionProducts: Product[] = [
     },
 ];
 
+const bookProducts: Product[] = [
+    {
+        id: 25,
+        name: 'The Chronos Catalyst',
+        description: 'A thrilling sci-fi adventure where a historian discovers a device that can manipulate time, forcing him to outwit a shadowy organization that wants to rewrite history.',
+        price: 19.99,
+        imageUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=800&auto=format&fit=crop',
+        category: 'Science Fiction',
+        tags: ['New', 'Best Seller'],
+        stock: { level: 'in-stock', quantity: 150 },
+        specifications: { 'Author': 'J.D. Vance', 'Pages': '384', 'Publisher': 'Quantum Press', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'SciFiFan', rating: 5, comment: 'A mind-bending plot with characters you root for. Couldn\'t put it down!' } ],
+        story: {
+            title: "A Race Against Time",
+            narrative: "In the dusty archives of a forgotten library, Dr. Aris Thorne stumbled upon more than just old manuscripts. He found a key—one that could unlock the past and chain the future. Now, with history itself as the battlefield, he must protect our timeline from those who would shatter it for their own gain.",
+            imageUrl: "https://images.unsplash.com/photo-1550399105-c4db5fb85c18?q=80&w=1200&auto=format&fit=crop"
+        },
+        tableOfContents: [
+            { title: "Chapter 1: The Discovery", page: 1 },
+            { title: "Chapter 2: Echoes of the Past", page: 2 },
+            { title: "Chapter 3: The Paradox", page: 3 },
+            { title: "Chapter 4: Hunter and Hunted", page: 4 },
+            { title: "Chapter 5: The Last Stand", page: 5 },
+        ],
+        content: [
+            "The dust motes danced in the single beam of light that pierced the gloom of the library's sub-basement. Dr. Aris Thorne, a man more comfortable with the dead than the living, felt a familiar thrill. It was here, amongst the forgotten and the neglected, that history whispered its truest secrets. He ran a gloved hand over the strange, metallic cube he had found nestled within a hollowed-out copy of 'Principia Mathematica'. It was cool to the touch, and hummed with a barely perceptible energy. It felt... ancient. And impossible.",
+            "He took the device back to his lab, a sanitized, modern space that was the antithesis of the library's dusty depths. Initial scans revealed nothing. It absorbed light, sound, and every form of radiation he could throw at it. It was a perfect black box, a void in the world of physics. It was only by accident, a slip of his hand while holding his antique pocket watch, that he discovered its true nature. The watch, its hands frozen for decades, suddenly ticked backward. One second. Then two. The cube flared with an inner light, and Aris felt a dizzying sensation, as if the world had lurched on its axis.",
+            "Panic and exhilaration warred within him. This was not some historical artifact; it was a key. A key that could rewrite the very fabric of time. As he grappled with the implications, a shadow fell across his door. He wasn't the only one who knew about the device. The whispers of history had been heard by others, and they were coming to claim their prize. His quiet life of academic pursuit was over. A new, dangerous chapter had just begun.",
+            "The chase was on. Through bustling city streets and across continents, Aris was pursued by the Chronos Guard, a clandestine group who saw the device not as a tool for understanding, but as a weapon for control. They were ruthless, efficient, and always one step behind. Aris, using his wits and historical knowledge, had to stay ahead, deciphering the cube's secrets while avoiding capture. Each jump through time was a risk, a potential tear in the fabric of reality. He saw glimpses of moments he only read about, the fall of empires and the birth of revolutions, each a potential trap.",
+            "Finally, cornered in the ruins of an ancient observatory, Aris knew he had to make a choice. He could destroy the device, ensuring the timeline remained safe but losing the greatest discovery in human history. Or he could use it one last time, a desperate gambit to erase the Chronos Guard from existence, a paradox that could unravel everything. The fate of history rested on the decision of a man who had only ever sought to study it. The cube pulsed in his hand, waiting."
+        ]
+    },
+    {
+        id: 26,
+        name: 'Whispers of the Elderwood',
+        description: 'An epic fantasy saga about a young elf who must unite warring kingdoms against a long-slumbering evil that threatens to consume the magical Elderwood.',
+        price: 24.99,
+        imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop',
+        category: 'Fantasy',
+        stock: { level: 'in-stock', quantity: 120 },
+        specifications: { 'Author': 'Elara Vance', 'Pages': '512', 'Publisher': 'Mythic Tomes', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'FantasyLover', rating: 5, comment: 'Incredible world-building and a magic system that feels fresh and exciting.' } ],
+    },
+    {
+        id: 27,
+        name: 'The Serpent\'s Cipher',
+        description: 'A fast-paced mystery where a symbologist must solve a series of ancient riddles to find a priceless artifact before a secret society does.',
+        price: 18.50,
+        imageUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=800&auto=format&fit=crop',
+        category: 'Mystery',
+        stock: { level: 'low', quantity: 10 },
+        specifications: { 'Author': 'Robert Langford', 'Pages': '420', 'Publisher': 'Enigma Books', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'DetectiveReads', rating: 4, comment: 'A smart, twisty thriller that keeps you guessing until the very end.' } ],
+    },
+    {
+        id: 28,
+        name: 'Cosmic Canvas',
+        description: 'A breathtaking journey through the cosmos, this non-fiction book explains complex astronomical concepts with stunning photography and accessible language.',
+        price: 35.00,
+        imageUrl: 'https://images.unsplash.com/photo-1543002588-b9b6db022976?q=80&w=800&auto=format&fit=crop',
+        category: 'Non-Fiction',
+        stock: { level: 'in-stock', quantity: 200 },
+        specifications: { 'Author': 'Dr. Evelyn Reed', 'Pages': '256', 'Publisher': 'Starlight Publishing', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'StarGazer', rating: 5, comment: 'The most beautiful and informative book about space I\'ve ever owned.' } ],
+    },
+    {
+        id: 29,
+        name: 'Echoes of the Moors',
+        description: 'A poignant work of classic literature set in the windswept English countryside, exploring themes of love, loss, and societal expectation.',
+        price: 14.99,
+        imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop',
+        category: 'Classic Literature',
+        stock: { level: 'in-stock', quantity: 80 },
+        specifications: { 'Author': 'Eleonora Vance', 'Pages': '320', 'Publisher': 'Heritage Classics', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'Bookworm', rating: 5, comment: 'A timeless story that resonates deeply. The prose is simply exquisite.' } ],
+    },
+    {
+        id: 30,
+        name: 'The Redwood Grimoire',
+        description: 'A chilling horror novel about a group of friends who unleash an ancient curse after finding a mysterious book in a remote cabin in the woods.',
+        price: 17.99,
+        imageUrl: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=800&auto=format&fit=crop',
+        category: 'Horror',
+        stock: { level: 'out-of-stock', quantity: 0 },
+        specifications: { 'Author': 'S. King', 'Pages': '448', 'Publisher': 'Nightshade Press', 'Language': 'English' },
+        reviews: [ { id: 1, author: 'SpookyReader', rating: 5, comment: 'Genuinely terrifying. I had to sleep with the lights on!' } ],
+    }
+];
+
+
 const sharedLightStyles = {
     '--shimmer-color': 'rgba(0, 0, 0, 0.08)',
     '--badge-text-color': '#111827',
@@ -730,6 +820,54 @@ export const themes: Record<Theme, AppTheme> = {
       'high-contrast': highContrastStyles,
     },
   },
+  [Theme.Book]: {
+    products: bookProducts,
+    styles: {
+      light: {
+        ...sharedLightStyles,
+        '--font-family': "'Playfair Display', serif",
+        '--background-primary': '#fbfaf5',
+        '--background-primary-translucent': 'rgba(251, 250, 245, 0.6)',
+        '--background-secondary': '#ffffff',
+        '--background-tertiary': '#f1ede9',
+        '--text-primary': '#4a3f35',
+        '--text-secondary': '#6e6055',
+        '--text-tertiary': '#9d8f85',
+        '--primary-accent': '#8B4513',
+        '--primary-accent-hover': '#a0522d',
+        '--primary-accent-aurora': 'rgba(139, 69, 19, 0.15)',
+        '--border-color': '#e0d8d1',
+        '--border-radius': '0.375rem',
+        '--header-gradient-from': '#c0a080',
+        '--header-gradient-to': '#8B4513',
+        '--bg-gradient-1': '#fbfaf5',
+        '--bg-gradient-2': '#f1ede9',
+        '--bg-gradient-3': '#fbfaf5',
+      },
+      dark: {
+        ...sharedDarkStyles,
+        '--font-family': "'Playfair Display', serif",
+        '--background-primary': '#1c1a19',
+        '--background-primary-translucent': 'rgba(28, 26, 25, 0.6)',
+        '--background-secondary': '#2a2725',
+        '--background-tertiary': '#383432',
+        '--text-primary': '#e8e0d4',
+        '--text-secondary': '#b8ada0',
+        '--text-tertiary': '#8a7f75',
+        '--primary-accent': '#d2b48c',
+        '--primary-accent-hover': '#e0cda9',
+        '--primary-accent-aurora': 'rgba(210, 180, 140, 0.15)',
+        '--border-color': '#383432',
+        '--border-radius': '0.375rem',
+        '--header-gradient-from': '#e0cda9',
+        '--header-gradient-to': '#d2b48c',
+        '--bg-gradient-1': '#1c1a19',
+        '--bg-gradient-2': '#2a2725',
+        '--bg-gradient-3': '#121110',
+      },
+      'high-contrast': highContrastStyles,
+    },
+  },
 };
 
 
@@ -743,6 +881,7 @@ export const translations: Translations = {
     'wishlistTooltip': 'Wishlist ({count})',
     'cartTooltip': 'Cart ({count})',
     'settingsTooltip': 'Settings',
+    'notificationsTooltip': 'Notifications',
     'loadMore': 'Load More',
     'noProductsFound': 'No Products Found',
     'noProductsFoundDesc': 'Try adjusting your search or filter criteria.',
@@ -765,6 +904,7 @@ export const translations: Translations = {
     'wishlistTooltip': 'Danh sách Yêu thích ({count})',
     'cartTooltip': 'Giỏ hàng ({count})',
     'settingsTooltip': 'Cài đặt',
+    'notificationsTooltip': 'Thông báo',
     'loadMore': 'Tải thêm',
     'noProductsFound': 'Không tìm thấy sản phẩm',
     'noProductsFoundDesc': 'Hãy thử điều chỉnh tiêu chí tìm kiếm hoặc bộ lọc của bạn.',
@@ -788,5 +928,13 @@ export const initialNotifications: Notification[] = [
         message: 'Explore our new features like AI Stylist and Voice Navigation.',
         read: false,
         timestamp: Date.now() - 1000 * 60 * 5, // 5 minutes ago
+    },
+    {
+        id: 'promo-1',
+        type: 'promo',
+        title: 'Summer Sale!',
+        message: 'Get 20% off on all Fashion items with code SALE20.',
+        read: false,
+        timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
     }
 ];

@@ -1,6 +1,5 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 
-// FIX: Correctly typed the setter function to support functional updates, aligning its API with `useState`. This resolves a type error in `App.tsx` when using a callback to set state.
 function useLocalStorage<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {

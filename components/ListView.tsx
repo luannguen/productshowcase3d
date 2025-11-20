@@ -19,6 +19,7 @@ interface ListViewProps {
   reduceMotion: boolean;
   onAddToCollection: (product: Product) => void;
   onNotifyMe: (product: Product) => void;
+  onReadBook: (product: Product) => void;
 }
 
 const highlightMatch = (text: string, query: string) => {
@@ -38,7 +39,7 @@ const StockIndicator: React.FC<{ stock: Product['stock'] }> = ({ stock }) => {
 };
 
 const ListItem: React.FC<Omit<ListViewProps, 'products' | 'searchQuery' | 'reduceMotion'> & { product: Product; searchQuery: string }> = 
-({ product, onProductClick, onAddToCart, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, searchQuery, onAddToCollection, onNotifyMe }) => {
+({ product, onProductClick, onAddToCart, onQuickView, onToggleWishlist, isProductInWishlist, onToggleCompare, isProductInCompare, searchQuery, onAddToCollection, onNotifyMe, onReadBook }) => {
     const isOutOfStock = product.stock.level === 'out-of-stock';
     return (
         <div className="interactive-border">
@@ -61,6 +62,9 @@ const ListItem: React.FC<Omit<ListViewProps, 'products' | 'searchQuery' | 'reduc
                     <Tooltip text="Add to Collection"><motion.button whileTap={{scale: 0.9}} onClick={(e) => { e.stopPropagation(); onAddToCollection(product); }} className="p-2 bg-[var(--background-tertiary)] text-white rounded-full hover:bg-[var(--primary-accent)]" aria-label="Add to Collection"><BookmarkIcon className="w-5 h-5"/></motion.button></Tooltip>
                     <Tooltip text="Quick View"><motion.button whileTap={{scale: 0.9}} onClick={(e) => { e.stopPropagation(); onQuickView(product); }} className="p-2 bg-[var(--background-tertiary)] text-white rounded-full hover:bg-[var(--primary-accent)]" aria-label="Quick View"><EyeIcon className="w-5 h-5"/></motion.button></Tooltip>
                     <Tooltip text={isProductInCompare(product.id) ? "Remove from Compare" : "Add to Compare"}><motion.button whileTap={{scale: 0.9}} onClick={(e) => { e.stopPropagation(); onToggleCompare(product); }} className={`p-2 bg-[var(--background-tertiary)] rounded-full hover:bg-[var(--primary-accent)] transition-colors ${isProductInCompare(product.id) ? 'text-[var(--primary-accent)]' : 'text-white'}`} aria-label="Add to Compare"><PlusIcon className={`w-5 h-5 transition-transform ${isProductInCompare(product.id) ? 'rotate-45' : ''}`}/></motion.button></Tooltip>
+                    {product.content && (
+                        <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onReadBook(product); }} className="px-3 py-2 bg-[var(--background-tertiary)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent)] transition-colors flex items-center gap-2">Read</motion.button>
+                    )}
                     {isOutOfStock ? (
                         <Tooltip text="Notify me">
                             <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onNotifyMe(product); }} className="px-3 py-2 bg-[var(--background-secondary)] text-[var(--text-primary)] font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent)] hover:text-white transition-colors flex items-center gap-2" aria-label={`Notify me about ${product.name}`}>
@@ -69,7 +73,7 @@ const ListItem: React.FC<Omit<ListViewProps, 'products' | 'searchQuery' | 'reduc
                         </Tooltip>
                     ) : (
                         <motion.button whileTap={{ scale: 0.95 }} onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1, e); }} className="px-3 py-2 bg-[var(--primary-accent)] text-white font-semibold rounded-[var(--border-radius)] hover:bg-[var(--primary-accent-hover)] transition-colors flex items-center gap-2" aria-label={`Add ${product.name} to cart`}>
-                            <CartIcon className="w-5 h-5" /> Add
+                            <CartIcon className="w-5 h-5" />
                         </motion.button>
                     )}
                 </div>
@@ -96,6 +100,7 @@ const ListView: React.FC<ListViewProps> = React.memo((props) => {
             isProductInCompare={props.isProductInCompare}
             onAddToCollection={props.onAddToCollection}
             onNotifyMe={props.onNotifyMe}
+            onReadBook={props.onReadBook}
         />
       ))}
     </div>

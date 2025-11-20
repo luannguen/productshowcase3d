@@ -27,6 +27,8 @@ export interface Product {
   };
   colors?: string[]; // hex codes
   priceHistory?: PriceDataPoint[];
+  content?: string[];
+  tableOfContents?: { title: string; page: number }[];
 }
 
 export interface CartItem {
@@ -48,12 +50,14 @@ export enum ViewMode {
   ThreeD = '3D View',
   Story = 'Story',
   ForYou = 'For You',
+  ReadBook = 'Read Book',
 }
 
 export enum Theme {
     Youthful = 'Youthful',
     Electronics = 'Electronics',
     Fashion = 'Fashion',
+    Book = 'Book',
 }
 
 export type SortOption = 'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'rating-desc' | 'newest-desc';
@@ -119,4 +123,56 @@ export interface PriceDataPoint {
 export interface VoiceCommand {
   keyword: string[];
   action: (param?: string) => void;
+}
+
+// Types for BookView enhancements
+export interface Highlight {
+  page: number;
+  text: string;
+  id: string;
+}
+
+export interface UserBookData {
+  [productId: number]: {
+    currentPage?: number;
+    bookmarks?: number[];
+    highlights?: Highlight[];
+    timeSpent?: number;
+  };
+}
+
+// Types for User Profile and Bookshelf
+export interface PurchasedItem extends Product {
+  purchaseDate: number;
+}
+
+// New types for Co-Authoring
+export interface MediaBlock {
+  id: string;
+  type: 'image' | 'video' | 'audio';
+  src: string; // URL or base64 data
+  caption?: string;
+}
+
+export interface TextBlock {
+  id: string;
+  type: 'text';
+  content: string; // Can be HTML string for formatting
+}
+
+export type PageBlock = TextBlock | MediaBlock;
+
+export interface PageContent {
+  blocks: PageBlock[];
+}
+
+export interface UserEdition {
+  id: string;
+  baseProductId: number;
+  name: string; // The user can rename their edition
+  coverImageUrl: string;
+  baseProduct: Product; // Store the original product for reference
+  content: PageContent[]; // The editable content
+  status: 'draft' | 'published';
+  publishedAt?: number;
 }

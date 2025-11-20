@@ -1,13 +1,10 @@
-
 import React, { useRef } from 'react';
-// FIX: Import Variants type from framer-motion to correctly type the variants object.
 import { motion, useMotionValue, useTransform, Variants } from 'framer-motion';
 
 interface BaseCardProps {
   children: React.ReactNode;
   onClick: () => void;
   id?: string;
-  // FIX: Add reduceMotion prop to handle accessibility settings.
   reduceMotion?: boolean;
 }
 
@@ -45,6 +42,7 @@ const BaseCard: React.FC<BaseCardProps> = ({ children, onClick, id, reduceMotion
   };
 
   const handleMouseLeave = () => {
+    if (reduceMotion) return;
     x.set(0);
     y.set(0);
   };
