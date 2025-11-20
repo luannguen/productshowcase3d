@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Product, UserBookData, Highlight } from '../types';
-import useLocalStorage from '../hooks/useLocalStorage';
+import { Product } from '../types';
 import * as Icons from './icons';
+import { useBookReader } from '../hooks/useBookReader';
 
 interface BookViewProps {
   product: Product;
@@ -11,12 +11,6 @@ interface BookViewProps {
 }
 
 type ReadingTheme = 'light' | 'sepia' | 'dark';
-type FontFamily = 'serif' | 'sans-serif' | 'lora' | 'merriweather';
-type TextAlign = 'left' | 'justify';
-type ActivePanel = 'toc' | 'search' | 'notes' | 'settings' | null;
-type ActiveNotesTab = 'bookmarks' | 'highlights';
-type TTSState = 'idle' | 'playing' | 'paused';
-
 const themeStyles: Record<ReadingTheme, React.CSSProperties> = {
   light: { '--bg-color': '#FFFFFF', '--text-color': '#111827', '--ui-bg': '#F3F4F6', '--ui-hover': '#E5E7EB', '--primary-accent': '#3B82F6' } as React.CSSProperties,
   sepia: { '--bg-color': '#FBF0D9', '--text-color': '#5B4636', '--ui-bg': '#F1E5CD', '--ui-hover': '#EADCC0', '--primary-accent': '#A0522D' } as React.CSSProperties,
@@ -24,193 +18,19 @@ const themeStyles: Record<ReadingTheme, React.CSSProperties> = {
 };
 
 const BookView: React.FC<BookViewProps> = ({ product, onClose }) => {
-  const [userBookData, setUserBookData] = useLocalStorage<UserBookData>('userBookData', {});
-  const bookData = useMemo(() => userBookData[product.id] || {}, [userBookData, product.id]);
-
-  const [currentPage, setCurrentPage] = useState(bookData.currentPage || 0);
-  const [isDualPageView, setIsDualPageView] = useState(window.innerWidth > 1024);
-  
-  // Settings States
-  const [activePanel, setActivePanel] = useState<ActivePanel>(null);
-  const [activeNotesTab, setActiveNotesTab] = useState<ActiveNotesTab>('bookmarks');
-  const [fontSize, setFontSize] = useLocalStorage('bookReader-fontSize', 18);
-  const [theme, setTheme] = useLocalStorage<ReadingTheme>('bookReader-theme', 'light');
-  const [fontFamily, setFontFamily] = useLocalStorage<FontFamily>('bookReader-fontFamily', 'serif');
-  const [lineHeight, setLineHeight] = useLocalStorage('bookReader-lineHeight', 1.6);
-  const [textAlign, setTextAlign] = useLocalStorage<TextAlign>('bookReader-textAlign', 'left');
-  
-  // Feature States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ page: number; snippet: string }[]>([]);
-  const [ttsState, setTtsState] = useState<TTSState>('idle');
-  const [areControlsVisible, setAreControlsVisible] = useState(true);
-  const [selectionPopup, setSelectionPopup] = useState<{ x: number; y: number; text: string } | null>(null);
-
-  const controlsTimeoutRef = useRef<number | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const totalPages = product.content?.length || 1;
-  const pageIncrement = isDualPageView ? 2 : 1;
-
-  const updateBookData = (updates: Partial<UserBookData[number]>) => {
-    setUserBookData(prev => ({
-      ...prev,
-      [product.id]: { ...(prev[product.id] || {}), ...updates }
-    }));
-  };
-
-  useEffect(() => {
-    updateBookData({ currentPage });
-    window.scrollTo(0, 0);
-  }, [currentPage]);
-
-  useEffect(() => {
-    const handleResize = () => setIsDualPageView(window.innerWidth > 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const goToPage = (page: number) => {
-    const newPage = Math.max(0, Math.min(page, totalPages - 1));
-    setCurrentPage(newPage);
-    setSelectionPopup(null);
-    window.speechSynthesis.cancel();
-    setTtsState('idle');
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') goToPage(currentPage + pageIncrement);
-      else if (e.key === 'ArrowLeft') goToPage(currentPage - pageIncrement);
-      else if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, pageIncrement, onClose]);
-
-  // Auto-hide controls
-  useEffect(() => {
-    const showControls = () => {
-      setAreControlsVisible(true);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      controlsTimeoutRef.current = window.setTimeout(() => {
-        if (!activePanel && !selectionPopup) setAreControlsVisible(false);
-      }, 3000);
-    };
-    
-    window.addEventListener('mousemove', showControls);
-    window.addEventListener('click', showControls);
-    showControls();
-    
-    return () => {
-      window.removeEventListener('mousemove', showControls);
-      window.removeEventListener('click', showControls);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    };
-  }, [activePanel, selectionPopup]);
-
-  const toggleBookmark = (page: number) => {
-    const bookmarks = bookData.bookmarks || [];
-    const newBookmarks = bookmarks.includes(page)
-      ? bookmarks.filter(b => b !== page)
-      : [...bookmarks, page].sort((a, b) => a - b);
-    updateBookData({ bookmarks: newBookmarks });
-  };
-
-  const removeBookmark = (page: number) => {
-    const bookmarks = bookData.bookmarks || [];
-    updateBookData({ bookmarks: bookmarks.filter(b => b !== page) });
-  };
-
-  const escapeRegExp = (string: string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  };
-
-  const runSearch = () => {
-    if (!searchQuery || !product.content) return;
-    const escapedQuery = escapeRegExp(searchQuery);
-    const results = product.content.flatMap((pageText, pageIndex) => {
-      const index = pageText.toLowerCase().indexOf(searchQuery.toLowerCase());
-      if (index > -1) {
-        const start = Math.max(0, index - 30);
-        const end = Math.min(pageText.length, index + searchQuery.length + 30);
-        const snippet = `...${pageText.substring(start, end)}...`;
-        return [{ page: pageIndex, snippet }];
-      }
-      return [];
-    });
-    setSearchResults(results);
-  };
-
-  const handleTTS = () => {
-    if (ttsState === 'playing') {
-      window.speechSynthesis.pause();
-      setTtsState('paused');
-    } else if (ttsState === 'paused') {
-      window.speechSynthesis.resume();
-      setTtsState('playing');
-    } else {
-      const textToSpeak = product.content?.[currentPage] || '';
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.onend = () => setTtsState('idle');
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-      setTtsState('playing');
-    }
-  };
-
-  // Selection Logic
-  const handleMouseUp = (e: React.MouseEvent) => {
-    const selection = window.getSelection();
-    if (selection && selection.toString().trim().length > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        setSelectionPopup({ 
-            x: rect.left + (rect.width / 2), 
-            y: rect.top + window.scrollY, 
-            text: selection.toString() 
-        });
-    } else {
-        setSelectionPopup(null);
-    }
-  };
-
-  const addHighlight = () => {
-    if (!selectionPopup) return;
-    const highlights = bookData.highlights || [];
-    const newHighlight: Highlight = { 
-        page: currentPage, 
-        text: selectionPopup.text, 
-        id: Date.now().toString() 
-    };
-    updateBookData({ highlights: [...highlights, newHighlight] });
-    setSelectionPopup(null);
-    // Clear selection
-    window.getSelection()?.removeAllRanges();
-  };
-  
-  const removeHighlight = (highlightId: string) => {
-    const highlights = bookData.highlights || [];
-    updateBookData({ highlights: highlights.filter(h => h.id !== highlightId) });
-  };
-
-  const getHighlightedContent = (pageContent: string, pageIndex: number) => {
-    if (!pageContent) return "";
-    const highlightsOnPage = (bookData.highlights || []).filter(h => h.page === pageIndex);
-    if (highlightsOnPage.length === 0) return pageContent;
-    
-    // Escape highlight text for regex and join with OR
-    const pattern = highlightsOnPage.map(h => escapeRegExp(h.text)).join('|');
-    const regex = new RegExp(`(${pattern})`, 'g');
-    
-    return pageContent.replace(regex, (match) => 
-        `<mark style="background-color: rgba(255, 215, 0, 0.4); color: inherit; padding: 2px 0;">${match}</mark>`
-    );
-  };
+  const {
+      currentPage, isDualPageView, activePanel, setActivePanel, activeNotesTab, setActiveNotesTab,
+      fontSize, setFontSize, theme, setTheme, fontFamily, setFontFamily, lineHeight, setLineHeight, textAlign, setTextAlign,
+      searchQuery, setSearchQuery, searchResults, ttsState, areControlsVisible, selectionPopup, setSelectionPopup,
+      contentRef, totalPages, pageIncrement, bookData,
+      goToPage, toggleBookmark, removeBookmark, runSearch, handleTTS, handleMouseUp, addHighlight, removeHighlight, getHighlightedContent
+  } = useBookReader(product, onClose);
 
   const wordCount = product.content?.join(' ').split(/\s+/).length || 0;
   const wordsRead = product.content?.slice(0, currentPage + 1).join(' ').split(/\s+/).length || 0;
   const progress = Math.round((wordsRead / wordCount) * 100) || 0;
+  
+  const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   return (
     <motion.div
@@ -335,12 +155,7 @@ const BookView: React.FC<BookViewProps> = ({ product, onClose }) => {
                             <label className="text-xs font-bold uppercase opacity-60 mb-2 block">Theme</label>
                             <div className="flex gap-2">
                                 {(['light', 'sepia', 'dark'] as ReadingTheme[]).map(t => (
-                                    <button 
-                                        key={t} 
-                                        onClick={() => setTheme(t)} 
-                                        className={`flex-1 h-10 rounded border-2 ${theme === t ? 'border-[var(--primary-accent)]' : 'border-transparent'}`}
-                                        style={{ backgroundColor: themeStyles[t]['--bg-color'] as string }}
-                                    />
+                                    <button key={t} onClick={() => setTheme(t)} className={`flex-1 h-10 rounded border-2 ${theme === t ? 'border-[var(--primary-accent)]' : 'border-transparent'}`} style={{ backgroundColor: themeStyles[t]['--bg-color'] as string }}/>
                                 ))}
                             </div>
                          </div>
@@ -354,7 +169,7 @@ const BookView: React.FC<BookViewProps> = ({ product, onClose }) => {
                          </div>
                          <div>
                             <label className="text-xs font-bold uppercase opacity-60 mb-2 block">Font Family</label>
-                            <select value={fontFamily} onChange={e => setFontFamily(e.target.value as FontFamily)} className="w-full p-2 rounded bg-[var(--ui-bg)] border-none outline-none">
+                            <select value={fontFamily} onChange={e => setFontFamily(e.target.value as any)} className="w-full p-2 rounded bg-[var(--ui-bg)] border-none outline-none">
                                 <option value="serif">Serif</option>
                                 <option value="sans-serif">Sans Serif</option>
                                 <option value="lora">Lora</option>
@@ -391,7 +206,7 @@ const BookView: React.FC<BookViewProps> = ({ product, onClose }) => {
             onMouseUp={handleMouseUp}
             ref={contentRef}
         >
-            {/* Page Navigation Buttons (Absolute overlays) */}
+            {/* Page Navigation Buttons */}
             <button onClick={() => goToPage(currentPage - pageIncrement)} disabled={currentPage === 0} className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-10 hover:bg-gradient-to-r from-black/5 to-transparent opacity-0 hover:opacity-100 transition-opacity disabled:hidden" aria-label="Previous Page" />
             <button onClick={() => goToPage(currentPage + pageIncrement)} disabled={currentPage >= totalPages - 1} className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-10 hover:bg-gradient-to-l from-black/5 to-transparent opacity-0 hover:opacity-100 transition-opacity disabled:hidden" aria-label="Next Page" />
 
