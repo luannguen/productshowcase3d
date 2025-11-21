@@ -1,5 +1,5 @@
 import { Theme, AppTheme } from '../types';
-import { electronicsProducts, youthfulProducts, fashionProducts, bookProducts } from './products';
+import { electronicsProducts, youthfulProducts, fashionProducts, bookProducts } from '../data/products';
 
 const sharedLightStyles = {
     '--shimmer-color': 'rgba(0, 0, 0, 0.08)',
