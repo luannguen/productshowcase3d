@@ -1,20 +1,21 @@
-import React, { Suspense, lazy, useEffect } from 'react';
-import { useModalContext } from '../../contexts/ModalContext';
-import { useProductContext } from '../../contexts/ProductContext';
-import { useCartContext } from '../../contexts/CartContext';
-import { useWishlistContext } from '../../contexts/WishlistContext';
-import { useUserContext } from '../../contexts/UserContext';
-import { useAppContext } from '../../contexts/AppContext';
+import React, { Suspense, lazy } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useModalContext } from '../../contexts/ModalContext';
+import { useWishlistContext } from '../../contexts/WishlistContext';
+import { useAppContext } from '../../contexts/AppContext';
+import { useUserContext } from '../../contexts/UserContext';
+import { useCartContext } from '../../contexts/CartContext';
+import { useProductContext } from '../../contexts/ProductContext';
+
+import ProductDetailModal from '../modals/ProductDetailModal';
+import QuickViewModal from '../modals/QuickViewModal';
 
 // Lazy Components
-const ProductDetailModal = lazy(() => import('../modals/ProductDetailModal'));
 const ProductManagementModal = lazy(() => import('../modals/ProductManagementModal'));
 const CartModal = lazy(() => import('../modals/CartModal'));
 const PurchaseModal = lazy(() => import('../modals/PurchaseModal'));
 const CommandPalette = lazy(() => import('../layout/CommandPalette'));
 const WishlistModal = lazy(() => import('../modals/WishlistModal'));
-const QuickViewModal = lazy(() => import('../modals/QuickViewModal'));
 const AIAssistant = lazy(() => import('../features/AIAssistant'));
 const SettingsModal = lazy(() => import('../modals/SettingsModal'));
 const CompareModal = lazy(() => import('../modals/CompareModal'));
@@ -28,11 +29,11 @@ const BookView = lazy(() => import('../views/BookView'));
 
 const ModalManager: React.FC = () => {
   const { activeModal, modalProps, closeModal, openModal } = useModalContext();
-  const { products, activeTheme, viewMode, setViewMode, compareItems, toggleCompare, addToRecentlyViewed } = useProductContext();
-  const { cart, addToCart, updateQuantity, removeFromCart, clearCart } = useCartContext();
   const { wishlist, toggleWishlist } = useWishlistContext();
   const { activeTheme: appTheme, setActiveTheme: setAppTheme, appearance, setAppearance, reduceMotion, setReduceMotion, locale, setLocale } = useAppContext();
   const { purchasedItems, userEditions, isProfileVisible, setProfileVisible, createEdition, updateEdition, publishEdition, addPurchase } = useUserContext();
+  const { cart, addToCart, updateQuantity, removeFromCart, clearCart } = useCartContext();
+  const { products, compareItems, addToRecentlyViewed, setViewMode } = useProductContext();
 
   // Onboarding Logic (Moved from App.tsx logic to here or a dedicated hook, 
   // but simplistic check here to trigger Onboarding modal if needed)
@@ -45,9 +46,9 @@ const ModalManager: React.FC = () => {
   const handleUpdateStory = (id: number, story: any) => { console.log('Update Story', id, story); };
 
   const handlePurchaseSuccess = (items: any) => {
-      addPurchase(items);
-      clearCart();
-      closeModal(); // or show success message inside PurchaseModal
+    addPurchase(items);
+    clearCart();
+    closeModal(); // or show success message inside PurchaseModal
   };
 
   // Helper to render specific modal
@@ -71,7 +72,7 @@ const ModalManager: React.FC = () => {
         // AI Assistant maintains its own chat history state internally or in AppContext? 
         // For this refactor, let's assume it manages history internally or we pass a simple state.
         // To strictly follow "Logic in Context", chat history should be in AppContext, but for simplicity let's keep it local to component or pass simplistic props.
-        return <AIAssistant isOpen={true} setIsOpen={(open) => !open && closeModal()} chatHistory={[]} setChatHistory={() => {}} products={products} />;
+        return <AIAssistant isOpen={true} setIsOpen={(open) => !open && closeModal()} chatHistory={[]} setChatHistory={() => { }} products={products} />;
       case 'SETTINGS':
         return <SettingsModal isOpen={true} onClose={closeModal} activeTheme={appTheme} setActiveTheme={setAppTheme} appearance={appearance} setAppearance={setAppearance} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} locale={locale} setLocale={setLocale} />;
       case 'COMPARE':
@@ -97,19 +98,19 @@ const ModalManager: React.FC = () => {
     <>
       <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center z-[9999] pointer-events-none"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>}>
         {activeModal && renderModal()}
-        
+
         {/* Profile is a special case as it acts like a full-screen overlay/modal */}
         <AnimatePresence>
-            {isProfileVisible && (
-                <UserProfile 
-                    purchasedItems={purchasedItems} 
-                    userEditions={userEditions} 
-                    onClose={() => setProfileVisible(false)} 
-                    onReadBook={(p) => { setProfileVisible(false); openModal('BOOK_READER', { product: p }); }} 
-                    onCreateEdition={(p) => { setProfileVisible(false); const e = createEdition(p); openModal('BOOK_EDITOR', { edition: e }); }} 
-                    onEditEdition={(e) => { setProfileVisible(false); openModal('BOOK_EDITOR', { edition: e }); }} 
-                />
-            )}
+          {isProfileVisible && (
+            <UserProfile
+              purchasedItems={purchasedItems}
+              userEditions={userEditions}
+              onClose={() => setProfileVisible(false)}
+              onReadBook={(p) => { setProfileVisible(false); openModal('BOOK_READER', { product: p }); }}
+              onCreateEdition={(p) => { setProfileVisible(false); const e = createEdition(p); openModal('BOOK_EDITOR', { edition: e }); }}
+              onEditEdition={(e) => { setProfileVisible(false); openModal('BOOK_EDITOR', { edition: e }); }}
+            />
+          )}
         </AnimatePresence>
       </Suspense>
     </>
